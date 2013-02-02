@@ -1,0 +1,758 @@
+# depslib dependency file v1.0
+1353751060 source:c:\users\alexandra\desktop\carlos\ucf ray tracer\ray tracer\main.c
+	<stdio.h>
+	<stdlib.h>
+
+1355006581 source:c:\users\alexandra\desktop\carlos\ucf ray tracer\ray tracer\error_handler.c
+	<stdio.h>
+	<stdlib.h>
+
+1355008875 source:c:\users\alexandra\desktop\carlos\ucf ray tracer\ray tracer\memory_handler.c
+	<stdio.h>
+	<stdlib.h>
+	"error_handler.h"
+
+1355002767 c:\users\alexandra\desktop\carlos\ucf ray tracer\ray tracer\error_handler.h
+
+1355030506 source:c:\users\alexandra\desktop\carlos\ucf ray tracer\ray tracer\vector.c
+	<stdio.h>
+	<math.h>
+	"vector.h"
+
+1355202714 source:c:\users\alexandra\desktop\carlos\ucf ray tracer\ray tracer\ray_tracer.c
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	"memory_handler.h"
+	"error_handler.h"
+	"file_handler.h"
+	"scene_loader.h"
+	"color.h"
+	"window.h"
+	"vector.h"
+	"object.h"
+	"light.h"
+	"intersection.h"
+
+1355002515 c:\users\alexandra\desktop\carlos\ucf ray tracer\ray tracer\memory_handler.h
+
+1355031754 c:\users\alexandra\desktop\carlos\ucf ray tracer\ray tracer\color.h
+
+1355004756 c:\users\alexandra\desktop\carlos\ucf ray tracer\ray tracer\window.h
+
+1355031682 c:\users\alexandra\desktop\carlos\ucf ray tracer\ray tracer\vector.h
+
+1355032371 c:\users\alexandra\desktop\carlos\ucf ray tracer\ray tracer\object.h
+	"color.h"
+
+1355024513 c:\users\alexandra\desktop\carlos\ucf ray tracer\ray tracer\intersection.h
+	"vector.h"
+	"object.h"
+
+1354999734 c:\users\alexandra\desktop\carlos\ucf ray tracer\ray tracer\scene_loader.h
+
+1355018251 source:c:\users\alexandra\desktop\carlos\ucf ray tracer\ray tracer\file_handler.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<stdint.h>
+	<math.h>
+	"memory_handler.h"
+	"color.h"
+
+1355018488 c:\users\alexandra\desktop\carlos\ucf ray tracer\ray tracer\file_handler.h
+	"color.h"
+
+1355027978 source:c:\users\alexandra\desktop\carlos\ucf ray tracer\ray tracer\sphere.c
+	<stdio.h>
+	<math.h>
+	"memory_handler.h"
+	"vector.h"
+	"object.h"
+	"intersection.h"
+	"sphere.h"
+
+1355028010 c:\users\alexandra\desktop\carlos\ucf ray tracer\ray tracer\sphere.h
+	"vector.h"
+
+1355203600 source:c:\users\alexandra\desktop\carlos\ucf ray tracer\ray tracer\scene_loader.c
+	<stdio.h>
+	<stdlib.h>
+	<ctype.h>
+	"memory_handler.h"
+	"vector.h"
+	"window.h"
+	"color.h"
+	"object.h"
+	"light.h"
+	"sphere.h"
+
+1355203648 source:c:\users\alexandra\desktop\carlos\ucf ray tracer\ray tracer\light.c
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	"color.h"
+	"light.h"
+	"vector.h"
+	"intersection.h"
+	"object.h"
+
+1355202619 c:\users\alexandra\desktop\carlos\ucf ray tracer\ray tracer\light.h
+	"vector.h"
+	"color.h"
+	"intersection.h"
+
+1355006582 source:c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\error_handler.c
+	<stdio.h>
+	<stdlib.h>
+
+1355018252 source:c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\file_handler.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<stdint.h>
+	<math.h>
+	"memory_handler.h"
+	"color.h"
+
+1355002516 c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\memory_handler.h
+
+1355031756 c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\color.h
+
+1357443672 source:c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\light.c
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	"color.h"
+	"light.h"
+	"vector.h"
+	"intersection.h"
+	"object.h"
+
+1355202620 c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\light.h
+	"vector.h"
+	"color.h"
+	"intersection.h"
+
+1357098658 c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\vector.h
+
+1357093421 c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\intersection.h
+	"vector.h"
+	"object.h"
+
+1357095181 c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\object.h
+	"color.h"
+	"plane.h"
+
+1357364064 source:c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\memory_handler.c
+	<stdio.h>
+	<stdlib.h>
+	"error_handler.h"
+
+1355002768 c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\error_handler.h
+
+1357103327 source:c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\scene_loader.c
+	<stdio.h>
+	<stdlib.h>
+	<ctype.h>
+	"memory_handler.h"
+	"vector.h"
+	"window.h"
+	"color.h"
+	"object.h"
+	"light.h"
+	"sphere.h"
+	"plane.h"
+	"polygon.h"
+	"coord_2d.h"
+	"cylinder.h"
+	"cone.h"
+	"disc.h"
+
+1355004758 c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\window.h
+
+1357443847 c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\sphere.h
+	"vector.h"
+
+1357361871 source:c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\sphere.c
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	"memory_handler.h"
+	"vector.h"
+	"object.h"
+	"intersection.h"
+	"sphere.h"
+
+1357098558 source:c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\vector.c
+	<stdio.h>
+	<math.h>
+	"memory_handler.h"
+	"vector.h"
+
+1359602696 source:c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\ray_tracer.c
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	"utilities/memory_handler.h"
+	"utilities/error_handler.h"
+	"utilities/file_handler.h"
+	"loading/scene_loader.h"
+	"tracing/color.h"
+	"tracing/window.h"
+	"tracing/vector.h"
+	"tracing/object.h"
+	"tracing/light.h"
+	"tracing/intersection.h"
+	"tracing/cached_ray.h"
+
+1355018490 c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\file_handler.h
+	"color.h"
+
+1354999736 c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\scene_loader.h
+
+1357356907 source:c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\intersection.c
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	"memory_handler.h"
+	"vector.h"
+	"intersection.h"
+	"object.h"
+
+1357095103 c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\plane.h
+	"vector.h"
+
+1357364251 source:c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\plane.c
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	"memory_handler.h"
+	"vector.h"
+	"object.h"
+	"intersection.h"
+	"plane.h"
+
+1357359392 source:c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\polygon.c
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	"memory_handler.h"
+	"vector.h"
+	"object.h"
+	"intersection.h"
+	"plane.h"
+	"polygon.h"
+
+1357095129 c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\polygon.h
+	"vector.h"
+	"plane.h"
+	"coord_2d.h"
+
+1355962508 c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\coord_2d.h
+
+1357364260 source:c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\cylinder.c
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	"memory_handler.h"
+	"vector.h"
+	"object.h"
+	"intersection.h"
+	"cylinder.h"
+
+1357100298 c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\cylinder.h
+	"vector.h"
+
+1357102085 source:c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\cone.c
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	"memory_handler.h"
+	"vector.h"
+	"object.h"
+	"intersection.h"
+	"cylinder.h"
+	"cone.h"
+
+1357095046 c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\cone.h
+	"cylinder.h"
+
+1357102148 source:c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\disc.c
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	"memory_handler.h"
+	"vector.h"
+	"object.h"
+	"intersection.h"
+	"plane.h"
+	"disc.h"
+
+1357095089 c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\disc.h
+	"vector.h"
+	"plane.h"
+
+1357443920 c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\cached_ray.h
+	"color.h"
+
+1359520199 source:c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\figures\cone.c
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	"../utilities/memory_handler.h"
+	"../tracing/vector.h"
+	"../tracing/object.h"
+	"../tracing/intersection.h"
+	"cylinder.h"
+	"cone.h"
+
+1355002516 c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\utilities\memory_handler.h
+
+1357098658 c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\tracing\vector.h
+
+1359515943 c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\tracing\object.h
+	"color.h"
+	"../figures/plane.h"
+
+1355031756 c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\tracing\color.h
+
+1359515271 c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\figures\plane.h
+	"../tracing/vector.h"
+
+1359515925 c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\tracing\intersection.h
+	"vector.h"
+	"object.h"
+
+1359515255 c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\figures\cylinder.h
+	"../tracing/vector.h"
+
+1357095046 c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\figures\cone.h
+	"cylinder.h"
+
+1359515489 source:c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\figures\cylinder.c
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	"../utilities/memory_handler.h"
+	"../tracing/vector.h"
+	"../tracing/object.h"
+	"../tracing/intersection.h"
+	"cylinder.h"
+
+1359515491 source:c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\figures\disc.c
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	"../utilities/memory_handler.h"
+	"../tracing/vector.h"
+	"../tracing/object.h"
+	"../tracing/intersection.h"
+	"plane.h"
+	"disc.h"
+
+1359515264 c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\figures\disc.h
+	"../tracing/vector.h"
+	"plane.h"
+
+1359515500 source:c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\figures\plane.c
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	"../utilities/memory_handler.h"
+	"../tracing/vector.h"
+	"../tracing/object.h"
+	"../tracing/intersection.h"
+	"plane.h"
+
+1359515493 source:c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\figures\polygon.c
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	"../utilities/memory_handler.h"
+	"../tracing/vector.h"
+	"../tracing/object.h"
+	"../tracing/intersection.h"
+	"plane.h"
+	"polygon.h"
+
+1359515277 c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\figures\polygon.h
+	"../tracing/vector.h"
+	"plane.h"
+	"coord_2d.h"
+
+1355962508 c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\figures\coord_2d.h
+
+1359515498 source:c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\figures\sphere.c
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	"../utilities/memory_handler.h"
+	"../tracing/vector.h"
+	"../tracing/object.h"
+	"../tracing/intersection.h"
+	"sphere.h"
+
+1359515282 c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\figures\sphere.h
+	"../tracing/vector.h"
+
+1359603007 source:c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\loading\scene_loader.c
+	<stdio.h>
+	<stdlib.h>
+	<libconfig.h>
+	<ctype.h>
+	"../utilities/memory_handler.h"
+	"../tracing/vector.h"
+	"../tracing/window.h"
+	"../tracing/color.h"
+	"../tracing/object.h"
+	"../tracing/light.h"
+	"../figures/sphere.h"
+	"../figures/plane.h"
+	"../figures/polygon.h"
+	"../figures/coord_2d.h"
+	"../figures/cylinder.h"
+	"../figures/cone.h"
+	"../figures/disc.h"
+
+1355004758 c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\tracing\window.h
+
+1359515933 c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\tracing\light.h
+	"vector.h"
+	"color.h"
+	"intersection.h"
+
+1355002768 c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\utilities\error_handler.h
+
+1359515601 c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\utilities\file_handler.h
+	"../tracing/color.h"
+
+1354999736 c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\loading\scene_loader.h
+
+1359515914 c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\tracing\cached_ray.h
+	"color.h"
+
+1359515786 source:c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\tracing\intersection.c
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	"../utilities/memory_handler.h"
+	"vector.h"
+	"intersection.h"
+	"object.h"
+
+1359515802 source:c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\tracing\light.c
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	"color.h"
+	"light.h"
+	"vector.h"
+	"intersection.h"
+	"object.h"
+
+1359515126 source:c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\tracing\vector.c
+	<stdio.h>
+	<math.h>
+	"../utilities/memory_handler.h"
+	"vector.h"
+
+1355006582 source:c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\utilities\error_handler.c
+	<stdio.h>
+	<stdlib.h>
+
+1359515843 source:c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\utilities\file_handler.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<stdint.h>
+	<math.h>
+	"memory_handler.h"
+	"../tracing/color.h"
+
+1359515854 source:c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\utilities\memory_handler.c
+	<stdio.h>
+	<stdlib.h>
+	"error_handler.h"
+
+1312352838 source:c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\loading\lib\grammar.c
+	<string.h>
+	<stdlib.h>
+	"libconfig.h"
+	"wincompat.h"
+	<malloc.h>
+	"parsectx.h"
+	"scanctx.h"
+	<stddef.h>
+	<libintl.h>
+	<alloca.h>
+	<malloc.h>
+	<stdlib.h>
+	<stdlib.h>
+	<stdio.h>
+
+1348892462 c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\loading\lib\libconfig.h
+	<stdio.h>
+
+1284108808 c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\loading\lib\wincompat.h
+	<windows.h>
+
+1264741726 c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\loading\lib\parsectx.h
+	"libconfig.h"
+	"strbuf.h"
+
+1264741760 c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\loading\lib\strbuf.h
+	<string.h>
+	<sys/types.h>
+
+1284108692 c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\loading\lib\scanctx.h
+	"libconfig.h"
+	"strbuf.h"
+	<stdio.h>
+	<sys/types.h>
+
+1314218174 source:c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\loading\lib\libconfig.c
+	"ac_config.h"
+	"libconfig.h"
+	"grammar.h"
+	"scanner.h"
+	"scanctx.h"
+	"parsectx.h"
+	"wincompat.h"
+	<locale.h>
+	<xlocale.h>
+	<stdlib.h>
+	<string.h>
+	<ctype.h>
+
+1312352838 c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\loading\lib\grammar.h
+
+1243411264 c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\loading\lib\scanner.h
+	<stdio.h>
+	<string.h>
+	<errno.h>
+	<stdlib.h>
+	<inttypes.h>
+
+1299831174 source:c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\loading\lib\scanctx.c
+	"scanctx.h"
+	"wincompat.h"
+	<stddef.h>
+	<stdlib.h>
+	<string.h>
+
+1348892242 source:c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\loading\lib\scanner.c
+	<stdio.h>
+	<string.h>
+	<errno.h>
+	<stdlib.h>
+	<inttypes.h>
+	<stdlib.h>
+	<ctype.h>
+	<string.h>
+	"grammar.h"
+	"wincompat.h"
+	"parsectx.h"
+	"scanctx.h"
+	<unistd.h>
+
+1264741756 source:c:\users\usuario\documents\carlos\ucf ray tracer\ray tracer\loading\lib\strbuf.c
+	"strbuf.h"
+	<string.h>
+	<stdlib.h>
+
+1359520199 source:c:\users\usuario\documents\github\ray_tracer\figures\cone.c
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	"../utilities/memory_handler.h"
+	"../tracing/vector.h"
+	"../tracing/object.h"
+	"../tracing/intersection.h"
+	"cylinder.h"
+	"cone.h"
+
+1355002516 c:\users\usuario\documents\github\ray_tracer\utilities\memory_handler.h
+
+1357098658 c:\users\usuario\documents\github\ray_tracer\tracing\vector.h
+
+1359515943 c:\users\usuario\documents\github\ray_tracer\tracing\object.h
+	"color.h"
+	"../figures/plane.h"
+
+1355031756 c:\users\usuario\documents\github\ray_tracer\tracing\color.h
+
+1359515271 c:\users\usuario\documents\github\ray_tracer\figures\plane.h
+	"../tracing/vector.h"
+
+1359515925 c:\users\usuario\documents\github\ray_tracer\tracing\intersection.h
+	"vector.h"
+	"object.h"
+
+1359515255 c:\users\usuario\documents\github\ray_tracer\figures\cylinder.h
+	"../tracing/vector.h"
+
+1357095046 c:\users\usuario\documents\github\ray_tracer\figures\cone.h
+	"cylinder.h"
+
+1359515489 source:c:\users\usuario\documents\github\ray_tracer\figures\cylinder.c
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	"../utilities/memory_handler.h"
+	"../tracing/vector.h"
+	"../tracing/object.h"
+	"../tracing/intersection.h"
+	"cylinder.h"
+
+1359515491 source:c:\users\usuario\documents\github\ray_tracer\figures\disc.c
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	"../utilities/memory_handler.h"
+	"../tracing/vector.h"
+	"../tracing/object.h"
+	"../tracing/intersection.h"
+	"plane.h"
+	"disc.h"
+
+1359515264 c:\users\usuario\documents\github\ray_tracer\figures\disc.h
+	"../tracing/vector.h"
+	"plane.h"
+
+1359515500 source:c:\users\usuario\documents\github\ray_tracer\figures\plane.c
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	"../utilities/memory_handler.h"
+	"../tracing/vector.h"
+	"../tracing/object.h"
+	"../tracing/intersection.h"
+	"plane.h"
+
+1359515493 source:c:\users\usuario\documents\github\ray_tracer\figures\polygon.c
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	"../utilities/memory_handler.h"
+	"../tracing/vector.h"
+	"../tracing/object.h"
+	"../tracing/intersection.h"
+	"plane.h"
+	"polygon.h"
+
+1359515277 c:\users\usuario\documents\github\ray_tracer\figures\polygon.h
+	"../tracing/vector.h"
+	"plane.h"
+	"coord_2d.h"
+
+1355962508 c:\users\usuario\documents\github\ray_tracer\figures\coord_2d.h
+
+1359515498 source:c:\users\usuario\documents\github\ray_tracer\figures\sphere.c
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	"../utilities/memory_handler.h"
+	"../tracing/vector.h"
+	"../tracing/object.h"
+	"../tracing/intersection.h"
+	"sphere.h"
+
+1359515282 c:\users\usuario\documents\github\ray_tracer\figures\sphere.h
+	"../tracing/vector.h"
+
+1359515786 source:c:\users\usuario\documents\github\ray_tracer\tracing\intersection.c
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	"../utilities/memory_handler.h"
+	"vector.h"
+	"intersection.h"
+	"object.h"
+
+1359515802 source:c:\users\usuario\documents\github\ray_tracer\tracing\light.c
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	"color.h"
+	"light.h"
+	"vector.h"
+	"intersection.h"
+	"object.h"
+
+1359515933 c:\users\usuario\documents\github\ray_tracer\tracing\light.h
+	"vector.h"
+	"color.h"
+	"intersection.h"
+
+1359515126 source:c:\users\usuario\documents\github\ray_tracer\tracing\vector.c
+	<stdio.h>
+	<math.h>
+	"../utilities/memory_handler.h"
+	"vector.h"
+
+1355006582 source:c:\users\usuario\documents\github\ray_tracer\utilities\error_handler.c
+	<stdio.h>
+	<stdlib.h>
+
+1359515843 source:c:\users\usuario\documents\github\ray_tracer\utilities\file_handler.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<stdint.h>
+	<math.h>
+	"memory_handler.h"
+	"../tracing/color.h"
+
+1359515854 source:c:\users\usuario\documents\github\ray_tracer\utilities\memory_handler.c
+	<stdio.h>
+	<stdlib.h>
+	"error_handler.h"
+
+1355002768 c:\users\usuario\documents\github\ray_tracer\utilities\error_handler.h
+
+1359603332 source:c:\users\usuario\documents\github\ray_tracer\loading\scene_loader.c
+	<stdio.h>
+	<stdlib.h>
+	<libconfig.h>
+	<ctype.h>
+	"../utilities/memory_handler.h"
+	"../tracing/vector.h"
+	"../tracing/window.h"
+	"../tracing/color.h"
+	"../tracing/object.h"
+	"../tracing/light.h"
+	"../figures/sphere.h"
+	"../figures/plane.h"
+	"../figures/polygon.h"
+	"../figures/coord_2d.h"
+	"../figures/cylinder.h"
+	"../figures/cone.h"
+	"../figures/disc.h"
+
+1355004758 c:\users\usuario\documents\github\ray_tracer\tracing\window.h
+
+1359603308 source:c:\users\usuario\documents\github\ray_tracer\ray_tracer.c
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	"utilities/memory_handler.h"
+	"utilities/error_handler.h"
+	"utilities/file_handler.h"
+	"loading/scene_loader.h"
+	"tracing/color.h"
+	"tracing/window.h"
+	"tracing/vector.h"
+	"tracing/object.h"
+	"tracing/light.h"
+	"tracing/intersection.h"
+	"tracing/cached_ray.h"
+
+1359515601 c:\users\usuario\documents\github\ray_tracer\utilities\file_handler.h
+	"../tracing/color.h"
+
+1354999736 c:\users\usuario\documents\github\ray_tracer\loading\scene_loader.h
+
+1359515914 c:\users\usuario\documents\github\ray_tracer\tracing\cached_ray.h
+	"color.h"
+

@@ -1,0 +1,1 @@
+This folder is needed for object files when building the app.

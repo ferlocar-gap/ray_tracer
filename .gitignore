@@ -3,10 +3,8 @@
 
 # Libraries
 *.lib
-*.a
 
 # Shared objects (inc. Windows DLLs)
-*.dll
 *.so
 *.so.*
 *.dylib
@@ -15,3 +13,6 @@
 *.exe
 *.out
 *.app
+
+# Other files
+image.bmp
