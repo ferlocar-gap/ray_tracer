@@ -39,7 +39,7 @@ int g_objs_length;
 Light* g_lights;
 int g_lights_length;
 long double g_environment_light;
-int g_max_antialiase_level = 2;
+int g_max_antialiase_level = 1;
 CachedRay *g_ray_cache;
 int g_pixel_density;
 int g_row_ray_count;
@@ -242,6 +242,6 @@ void paint_scene(int width_res, int height_res)
 int main(int argc, char** argv)
 {
 	load_scene("scene.cfg");
-	//paint_scene(800, 800);
+	paint_scene(400, 400);
 	return 0;
 }

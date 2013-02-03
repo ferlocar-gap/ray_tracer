@@ -88,7 +88,7 @@ void* get_cylinder_intersection(Vector eye, Vector dir_vec, void* object_ptr, in
 	//Obtenemos el discriminante
 	long double a = pow(varD.x, 2) + pow(varD.y, 2) + pow(varD.z, 2);
 	long double b = 2 * do_dot_product(varE, varD);
-	long double c = pow(varE.x, 2) + pow(varE.y, 2) + pow(varE.z, 2) - pow(cyl_ptr->radio, 2);
+	long double c = pow(varE.x, 2) + pow(varE.y, 2) + pow(varE.z, 2) - pow(cyl_ptr->radius, 2);
 
 	return get_cyl_cone_intersection(a, b, c, eye, dir_vec, object_ptr, length);
 }
@@ -104,6 +104,6 @@ Vector get_cylinder_normal_vector(Vector posn, void* cylinder_ptr)
 {
 	Cylinder cyl = *((Cylinder*) cylinder_ptr);
 	long double m_distance = do_dot_product(cyl.direction, subtract_vectors(posn, cyl.anchor));
-	Vector normal_vector = multiply_vector(1.0 / cyl.radio, subtract_vectors(posn, get_ray_position(cyl.anchor, cyl.direction, m_distance)));
+	Vector normal_vector = multiply_vector(1.0 / cyl.radius, subtract_vectors(posn, get_ray_position(cyl.anchor, cyl.direction, m_distance)));
 	return normal_vector;
 }

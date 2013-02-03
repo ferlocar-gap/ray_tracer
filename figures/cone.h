@@ -8,7 +8,7 @@
  * a cone only differ on their intersection and normal functions. A cone struct
  * represents two cones connected by their top at 'anchor'. Also, the following
  * attributes on a Cone struct are interpreted differently from a Cylinder.
- * radio: Width::Height ratio. A ratio of 2 means that the cone is two times
+ * radius: Width::Height ratio. A ratio of 2 means that the cone is two times
  *        wider than its height. A ratio of 0.5 means that the cone is two
  *        times higher than its width.
  * front_length: Length of the cone that points to 'direction'.

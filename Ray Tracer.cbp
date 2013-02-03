@@ -67,6 +67,7 @@
 		<Unit filename="ray_tracer.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="scene.cfg" />
 		<Unit filename="tracing/cached_ray.h" />
 		<Unit filename="tracing/color.h" />
 		<Unit filename="tracing/intersection.c">

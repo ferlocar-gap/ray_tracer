@@ -7,6 +7,8 @@
 // Headers
 #include <stdio.h>
 #include <stdlib.h>
+#include <libconfig.h>
+#include "error_handler.h"
 
 // Error messages
 #define SUCCESS_MSG "Success. No Error.\n"
@@ -14,6 +16,8 @@
 #define OPEN_FILE_MSG "USER ERROR: Opening error.\n"
 #define MISSING_CONFIG_PROPERTY_MSG "USER ERROR: Missing a property in the configuration file.\n"
 #define UNDEFINED_TYPE_MSG "USER ERROR: Undefined object type in the configuration file.\n"
+#define MISSSING_CONFIGURATION_FILE_MSG "USER ERROR: You must provide a configuration file named \"scene.cfg\" at the root of the project.\n"
+#define MISSSING_CONFIGURATION_ATTR_MSG "USER ERROR: Missing a configuration attribute in \"scene.cfg\".\n"
 
 char *ERROR_MESSAGES[] =
 {
@@ -21,7 +25,9 @@ char *ERROR_MESSAGES[] =
 	MEMORY_ALLOCATION_MSG,
 	OPEN_FILE_MSG,
 	MISSING_CONFIG_PROPERTY_MSG,
-	UNDEFINED_TYPE_MSG
+	UNDEFINED_TYPE_MSG,
+	MISSSING_CONFIGURATION_FILE_MSG,
+	MISSSING_CONFIGURATION_ATTR_MSG
 };
 
 // Methods
@@ -32,8 +38,14 @@ char *ERROR_MESSAGES[] =
  * error_code: Unique error code associated to the error message you want to print
  */
 
-void* print_error(int error_code)
+void print_error(int error_code)
 {
 	printf("%s", ERROR_MESSAGES[error_code]);
 }
 
+void* throw_config_error(config_setting_t *setting, char *attr_path, char *attr_type)
+{
+    print_error(MISSING_CONFIGURATION_ATTR_ERROR);
+    printf("Missing attribute '%s' of type '%s', line %d", attr_path, attr_type, setting->line);
+    exit(MISSING_CONFIGURATION_ATTR_ERROR);
+}

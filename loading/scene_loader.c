@@ -11,6 +11,7 @@
 #include <libconfig.h>
 #include <ctype.h>
 #include "../utilities/memory_handler.h"
+#include "../utilities/error_handler.h"
 #include "../tracing/vector.h"
 #include "../tracing/window.h"
 #include "../tracing/color.h"
@@ -24,78 +25,13 @@
 #include "../figures/cone.h"
 #include "../figures/disc.h"
 
-// Constants
-
-// General Scene Properties
-#define false 0;
-#define g_eye_PROPERTY "g_eye:"
-#define WINDOW_PROPERTY "WINDOW:"
-#define BACKGROUND_PROPERTY "BACKGROUND:"
-#define ENVIRONMENT_LIGHT_PROPERTY "ENVIRONMENT_LIGHT:"
-#define X_MIN_PROPERY "X_MIN:"
-#define X_MAX_PROPERY "X_MAX:"
-#define Y_MIN_PROPERY "Y_MIN:"
-#define Y_MAX_PROPERY "Y_MAX:"
-#define Z_ANCHOR_PROPERY "Z_ANCHOR:"
-
-// General Object Properties
-#define OBJECTS_PROPERTY "OBJECTS:"
-#define OBJECT_PROPERTY "OBJECT:"
-#define OBJECT_AMOUNT_PROPERTY "OBJECT_AMOUNT:"
-#define OBJ_TYPE_PROPERTY "TYPE:"
-#define OBJ_LIGHT_MATERIAL_PROPERTY "LIGHT_MATERIAL:"
-#define OBJ_LIGHT_AMBIENTAL_PROPERTY "LIGHT_AMBIENTAL:"
-#define OBJ_SPECULAR_MATERIAL_PROPERTY "SPECULAR_MATERIAL:"
-#define OBJ_SPECULAR_POW_PROPERTY "SPECULAR_POW:"
-
-#define SPHERE_PROPERTY "SPHERE "
-#define RADIO_PROPERTY "RADIO:"
-#define SPHERE_CENTER_PROPERTY "SPHERE_CENTER:"
-
-#define PLANE_PROPERTY "PLANE "
-#define POLYGON_PROPERTY "POLYGON "
-#define POINTS_PROPERTY "POINTS:"
-#define POINT_PROPERTY "POINT:"
-
-#define CYLINDER_PROPERTY "CYLINDER "
-#define CYLINDER_ANCHOR_PROPERTY "ANCHOR:"
-#define CYLINDER_DIRECTION_PROPERTY "DIR_VECTOR:"
-#define IS_FINITE_PROPERTY "IS_FINITE:"
-#define FRONT_LENGTH_PROPERTY "FRONT_LENGTH:"
-#define BACK_LENGTH_PROPERTY "BACKWARD_LENGTH:"
-
-#define CONE_PROPERTY "CONE "
-#define WIDTH_PER_LENGTH_PROPERTY "WIDTH_PER_LENGTH:"
-
-#define ELIPSIS_PROPERTY "ELIPSIS "
-#define ELIPSIS_FOCUS1_PROPERTY "FOCUS1:"
-#define ELIPSIS_FOCUS2_PROPERTY "FOCUS2:"
-#define CIRCULAR_DISTANCE_PROPERTY "CIRCULAR_DISTANCE:"
-
-#define CIRCULAR_DISC_PROPERTY "DISC "
-#define DISC_CENTER_PROPERTY "CENTER:"
-#define INTERIOR_RADIO_PROPERTY "INTERIOR_RADIO:"
-#define EXTERIOR_RADIO_PROPERTY "EXTERIOR_RADIO:"
-
-// Light properties
-#define LIGHTS_PROPERTY "LIGHTS:"
-#define LIGHT_PROPERTY "LIGHT:"
-#define LIGHT_AMOUNT_PROPERTY "LIGHT_AMOUNT:"
-#define INTENSITY_PROPERTY "INTENSITY:"
-#define LIGHT_ANCHOR_PROPERTY "LIGHT_ANCHOR:"
-#define CONST_ATT_FACTOR "CONSTANTS_ATT_FACTOR:"
-#define LIN_ATT_FACTOR "LINEAR_ATT_FACTOR:"
-#define EXP_ATT_FACTOR "EXPONENTIAL_ATT_FACTOR:"
-
-// General properties
-#define X_PROPERTY "X:"
-#define Y_PROPERTY "Y:"
-#define Z_PROPERTY "Z:"
-#define RED_PROPERTY "RED:"
-#define GREEN_PROPERTY "GREEN:"
-#define BLUE_PROPERTY "BLUE:"
-#define TRUE_PROPERTY "TRUE "
-#define NORMAL_VECTOR_PROPERTY "NORMAL_VECTOR:"
+// Figure types codes
+#define SPHERE_CODE 0
+#define PLANE_CODE 1
+#define POLYGON_CODE 2
+#define DISC_CODE 3
+#define CYLINDER_CODE 4
+#define CONE_CODE 5
 
 // Global variables
 extern Window g_window;
@@ -110,358 +46,388 @@ extern long double g_environment_light;
 // Methods
 
 /*
+ * Loads an integer from a configuration setting.
+ */
+long double load_boolean(config_setting_t *setting, char *attr_path)
+{
+    int result;
+    if (!config_setting_lookup_bool(setting, attr_path, &result)) throw_config_error(setting, attr_path, "boolean");
+    return result;
+}
+
+/*
+ * Loads an integer from a configuration setting.
+ */
+long double load_int(config_setting_t *setting, char *attr_path)
+{
+    int result;
+    if (!config_setting_lookup_int(setting, attr_path, &result)) throw_config_error(setting, attr_path, "int");
+    return result;
+}
+
+/*
+ * Loads a long double from a configuration setting.
+ */
+long double load_long_double(config_setting_t *setting, char *attr_path)
+{
+    double attr;
+    long double result;
+    if (config_setting_lookup_float(setting, attr_path, &attr))
+        result = attr;
+    else
+        throw_config_error(setting, attr_path, "double");
+    return result;
+}
+
+/*
+ * Loads a setting from the configuration file.
+ */
+config_setting_t* load_setting_from_cfg(config_t *cfg, char *setting_path)
+{
+    config_setting_t *setting = config_lookup(cfg, setting_path);
+    if (!setting) exit(MISSING_CONFIGURATION_ATTR_ERROR);
+    return setting;
+}
+
+/*
+ * Loads a sub setting from a setting.
+ */
+config_setting_t* load_setting(config_setting_t *setting, char *setting_path)
+{
+    config_setting_t *child_setting = config_setting_get_member(setting, setting_path);
+    if (!child_setting) throw_config_error(setting, setting_path, "setting");
+    return child_setting;
+}
+
+/*
+ * Loads a vector from a configuration setting.
+ */
+Vector load_vector(config_setting_t *setting)
+{
+    Vector vec;
+    vec.x = load_long_double(setting, "x");
+    vec.y = load_long_double(setting, "y");
+    vec.z = load_long_double(setting, "z");
+    return vec;
+}
+
+/*
+ * Loads a color from a configuration setting.
+ */
+Color load_color(config_setting_t *setting)
+{
+    Color color;
+    color.red = load_long_double(setting, "red");
+    color.green = load_long_double(setting, "green");
+    color.blue = load_long_double(setting, "blue");
+    return color;
+}
+
+/*
  * Loads the eye position in the 'g_eye' variable.
  */
-void load_eye(char *buffer)
+void load_eye(config_t *cfg)
 {
-    g_eye.x = 250;
-    g_eye.y = 250;
-    g_eye.z = -1000;
-	/*char *g_eye_str = GetPropertyBeginning(buffer, g_eye_PROPERTY);
-	g_eye.x = strtold(GetPropertyBeginning(g_eye_str, X_PROPERTY), NULL);
-	g_eye.y = strtold(GetPropertyBeginning(g_eye_str, Y_PROPERTY), NULL);
-	g_eye.z = strtold(GetPropertyBeginning(g_eye_str, Z_PROPERTY), NULL);*/
+    config_setting_t *eye_setting = load_setting_from_cfg(cfg, "eye");
+    g_eye = load_vector(eye_setting);
 }
 
 /*
  * Loads the window position in the 'g_window' variable.
  */
-void load_scene_window(char* buffer)
+void load_scene_window(config_t *cfg)
 {
-    g_window.x_max = 750;
-    g_window.x_min = 0;
-    g_window.y_max = 750;
-    g_window.y_min = 0;
-    g_window.z_anchor = 0;
-/*	char* window_str = GetPropertyBeginning(buffer, WINDOW_PROPERTY);
-	Scene_Window.x_min = strtold(GetPropertyBeginning(window_str, X_MIN_PROPERY), NULL);
-	Scene_Window.y_min = strtold(GetPropertyBeginning(window_str, Y_MIN_PROPERY), NULL);
-	Scene_Window.x_max = strtold(GetPropertyBeginning(window_str, X_MAX_PROPERY), NULL);
-	Scene_Window.y_max = strtold(GetPropertyBeginning(window_str, Y_MAX_PROPERY), NULL);
-	Scene_Window.z_anchor = strtold(GetPropertyBeginning(window_str, Z_ANCHOR_PROPERY), NULL);*/
+    config_setting_t *win_setting = load_setting_from_cfg(cfg, "window");
+    g_window.x_min = load_long_double(win_setting, "x_min");
+    g_window.y_min = load_long_double(win_setting, "y_min");
+    g_window.x_max = load_long_double(win_setting, "x_max");
+    g_window.y_max = load_long_double(win_setting, "y_max");
+    g_window.z_anchor = load_long_double(win_setting, "z_anchor");
 }
 
 /*
  * Loads the background color in the 'g_background' variable.
  */
-void load_background(char* buffer)
+void load_background(config_t *cfg)
 {
-    g_background.red = 0.7;
-    g_background.green = 0.7;
-    g_background.blue = 0.7;
-	/*char* background_str = GetPropertyBeginning(buffer, BACKGROUND_PROPERTY);
-	Background.red = strtold(GetPropertyBeginning(background_str, RED_PROPERTY), NULL);
-	Background.green = strtold(GetPropertyBeginning(background_str, GREEN_PROPERTY), NULL);
-	Background.blue = strtold(GetPropertyBeginning(background_str, BLUE_PROPERTY), NULL);*/
+    config_setting_t *bg_setting = load_setting_from_cfg(cfg, "background");
+    g_background = load_color(bg_setting);
 }
+
+/*
+ * Loads a sphere figure.
+ */
+Sphere* load_sphere(config_setting_t *sphere_setting, Object *obj)
+{
+    Sphere *sphere;
+    config_setting_t *center_setting;
+
+    sphere = (Sphere*)get_memory(sizeof(Sphere), NULL);
+    sphere->radius = load_long_double(sphere_setting, "radius");
+    center_setting = load_setting(sphere_setting, "center");
+    sphere->center = load_vector(center_setting);
+    if(obj)
+    {
+        obj->get_intersections = &get_sphere_intersection;
+        obj->get_normal_vector = &get_sphere_normal_vector;
+    }
+    return sphere;
+}
+
+/*
+ * Loads a plane figure.
+ */
+Plane* load_plane(config_setting_t *plane_setting, Object *obj)
+{
+    Plane *plane;
+    config_setting_t *dir_setting, *anchor_setting;
+    Vector direction, anchor, eye_dir;
+    long double dir_length;
+
+    plane = (Plane*) get_memory(sizeof(Plane), NULL);
+	anchor_setting = load_setting(plane_setting, "anchor");
+	dir_setting = load_setting(plane_setting, "direction");
+	direction = load_vector(dir_setting);
+	anchor = load_vector(anchor_setting);
+	plane->offset = - do_dot_product(direction, anchor);
+	dir_length = normalize_vector(&direction);
+	plane->offset /= dir_length;
+	plane->direction = direction;
+	// Make validation to make sure the normal vector is facing the eye.
+	eye_dir = subtract_vectors(anchor, g_eye);
+    normalize_vector(&eye_dir);
+    if(do_dot_product(eye_dir, direction) >= 0)
+    {
+        plane->offset *= -1;
+        plane->direction = multiply_vector(-1, plane->direction);
+    }
+    if(obj)
+    {
+        obj->get_intersections = &get_plane_intersection;
+        obj->get_normal_vector = &get_plane_normal_vector;
+    }
+    return plane;
+}
+
+/*
+ * Loads a polygon figure.
+ */
+Polygon* load_polygon(config_setting_t *polygon_setting, Object *obj)
+{
+    Polygon *polygon;
+    Plane *poly_plane;
+    int vertex_i;
+    config_setting_t *plane_setting, *all_vertex_setting, *vertex_setting;
+
+    polygon = (Polygon*)get_memory(sizeof(Polygon), NULL);
+    plane_setting = load_setting(polygon_setting, "plane");
+    poly_plane = load_plane(plane_setting, NULL);
+    polygon->plane = *poly_plane;
+    free(poly_plane);
+    all_vertex_setting = load_setting(polygon_setting, "vertex");
+    polygon->vertex_amount = config_setting_length(all_vertex_setting);
+    polygon->vertex = (Coord2D*) get_memory(sizeof(Coord2D) * polygon->vertex_amount, NULL);
+    for(vertex_i = 0; vertex_i < polygon->vertex_amount; vertex_i++)
+    {
+        vertex_setting = config_setting_get_elem(all_vertex_setting, vertex_i);
+        polygon->vertex[vertex_i].u = load_long_double(vertex_setting, "u");
+        polygon->vertex[vertex_i].v = load_long_double(vertex_setting, "v");
+    }
+    if(obj)
+    {
+        obj->get_intersections = &get_polygon_intersection;
+        obj->get_normal_vector = &get_polygon_normal_vector;
+    }
+    return polygon;
+}
+
+/*
+ * Loads a disc figure.
+ */
+Disc* load_disc(config_setting_t *disc_setting, Object *obj)
+{
+    Disc *disc;
+    Plane *disc_plane;
+    config_setting_t *plane_sett, *in_focus1_sett, *in_focus2_sett, *ext_focus1_sett, *ext_focus2_sett;
+
+    disc = (Disc*) get_memory(sizeof(Disc), NULL);
+    plane_sett = load_setting(disc_setting, "plane");
+    disc_plane = load_plane(plane_sett, NULL);
+    disc->plane = *disc_plane;
+    free(disc_plane);
+    in_focus1_sett = load_setting(disc_setting, "inner_focus1");
+    in_focus2_sett = load_setting(disc_setting, "inner_focus2");
+    ext_focus1_sett = load_setting(disc_setting, "external_focus1");
+    ext_focus2_sett = load_setting(disc_setting, "external_focus2");
+    disc->inner_focus1 = load_vector(in_focus1_sett);
+    disc->inner_focus2 = load_vector(in_focus2_sett);
+    disc->ext_focus1 = load_vector(ext_focus1_sett);
+    disc->ext_focus2 = load_vector(ext_focus2_sett);
+    disc->inner_dist = load_long_double(disc_setting, "inner_distance");
+    disc->ext_dist = load_long_double(disc_setting, "external_distance");
+    if(obj)
+    {
+        obj->get_intersections = &get_disc_intersection;
+        obj->get_normal_vector = &get_disc_normal_vector;
+    }
+    return disc;
+}
+
+/*
+ * Loads a cylinder figure.
+ */
+Cylinder* load_cylinder(config_setting_t *cylinder_setting, Object *obj)
+{
+    Cylinder *cylinder;
+    config_setting_t *direction_setting, *anchor_setting;
+
+    cylinder = (Cylinder*) get_memory(sizeof(Cylinder), NULL);
+    direction_setting = load_setting(cylinder_setting, "direction");
+    cylinder->direction = load_vector(direction_setting);
+    normalize_vector(&(cylinder->direction));
+    anchor_setting = load_setting(cylinder_setting, "anchor");
+    cylinder->anchor = load_vector(anchor_setting);
+	cylinder->radius = load_long_double(cylinder_setting, "radius");
+	cylinder->is_finite = load_boolean(cylinder_setting, "is_finite");
+	cylinder->front_length = load_long_double(cylinder_setting, "front_length");
+	cylinder->back_length = - load_long_double(cylinder_setting, "back_length");
+    if(obj)
+    {
+        obj->get_intersections = &get_cylinder_intersection;
+        obj->get_normal_vector = &get_cylinder_normal_vector;
+    }
+    return cylinder;
+}
+
+/*
+ * Loads a cone figure.
+ */
+Cone* load_cone(config_setting_t *cone_setting, Object *obj)
+{
+    Cone *cone = (Cone*) load_cylinder(cone_setting, NULL);
+    if(obj)
+    {
+        obj->get_intersections = &get_cone_intersection;
+        obj->get_normal_vector = &get_cone_normal_vector;
+    }
+    return cone;
+}
+
+/*
+ * Loads the figure of an object
+ */
+void* load_figure(config_setting_t *obj_setting, Object *obj)
+{
+    int figure_code;
+    config_setting_t *figure_setting;
+    void *figure;
+
+    figure_code = load_int(obj_setting, "figure_code");
+    figure_setting = load_setting(obj_setting, "figure");
+    switch(figure_code)
+    {
+    case SPHERE_CODE:
+        figure = load_sphere(figure_setting, obj);
+        break;
+    case PLANE_CODE:
+        figure = load_plane(figure_setting, obj);
+        break;
+    case POLYGON_CODE:
+        figure = load_polygon(figure_setting, obj);
+        break;
+    case DISC_CODE:
+        figure = load_disc(figure_setting, obj);
+        break;
+    case CYLINDER_CODE:
+        figure = load_cylinder(figure_setting, obj);
+        break;
+    case CONE_CODE:
+        figure = load_cone(figure_setting, obj);
+        break;
+    default:
+        figure = NULL;
+        break;
+    }
+    return figure;
+ }
 
 /*
  * Loads all the scene objects and stores them in the 'g_objs' variable. The
  * size of the array will be stored in the 'g_objs_length' variable.
  */
-void load_objects(char* buffer)
+void load_objects(config_t *cfg)
 {
-    g_objs_length = 7;
+    int obj_i, cut_plane_i;
+    Object curr_obj;
+    Plane *cut_plane;
+    config_setting_t *objs_setting, *obj_setting, *color_setting, *planes_setting, *plane_setting;
+
+    objs_setting = load_setting_from_cfg(cfg, "objects");
+    g_objs_length = config_setting_length(objs_setting);
     g_objs = (Object*) get_memory(sizeof(Object)*g_objs_length, NULL);
-    g_objs->color.green = 1;
-    g_objs->color.red = 0;
-    g_objs->color.blue = 0;
-    g_objs->light_material = 1;
-    g_objs->light_ambiental = 1;
-    g_objs->specular_material = 1;
-    g_objs->specular_pow = 10;
-    g_objs->get_intersections = &get_sphere_intersection;
-    g_objs->get_normal_vector = &get_sphere_normal_vector;
-
-    Plane *cut_plane = (Plane*) get_memory(sizeof(Plane), NULL);
-	cut_plane->offset = 20;
-	cut_plane->direction.x = 0;
-	cut_plane->direction.y = 0;
-	cut_plane->direction.z = -1;
-	g_objs->cutting_planes = cut_plane;
-	g_objs->cutting_planes_length = 1;
-
-    Sphere *sphere = (Sphere*) get_memory(sizeof(Sphere), NULL);
-	sphere->radius = 100;
-	sphere->center.x = 400;
-	sphere->center.y = 300;
-	sphere->center.z = 100;
-    g_objs->figure = sphere;
-
-
-
-
-    g_objs[1].color.green = 0;
-    g_objs[1].color.red = 0;
-    g_objs[1].color.blue = 1;
-    g_objs[1].light_material = 1;
-    g_objs[1].light_ambiental = 0;
-    g_objs[1].specular_material = 1;
-    g_objs[1].specular_pow = 10;
-    g_objs[1].cutting_planes_length = 0;
-    g_objs[1].get_intersections = &get_sphere_intersection;
-    g_objs[1].get_normal_vector = &get_sphere_normal_vector;
-
-    sphere = (Sphere*) get_memory(sizeof(Sphere), NULL);
-	sphere->radius = 30;
-	sphere->center.x = 100;
-	sphere->center.y = 100;
-	sphere->center.z = 50;
-    g_objs[1].figure = sphere;
-
-
-
-
-
-    g_objs[2].color.green = 0;
-    g_objs[2].color.red = 0;
-    g_objs[2].color.blue = 1;
-    g_objs[2].light_material = 1;
-    g_objs[2].light_ambiental = 0;
-    g_objs[2].specular_material = 1;
-    g_objs[2].specular_pow = 10;
-    g_objs[2].cutting_planes_length = 0;
-    g_objs[2].get_intersections = &get_plane_intersection;
-    g_objs[2].get_normal_vector = &get_plane_normal_vector;
-
-    Plane *plane = (Plane*) get_memory(sizeof(Plane), NULL);
-	plane->offset = 0;
-	plane->direction.x = 0;
-	plane->direction.y = 1;
-	plane->direction.z = 0;
-    g_objs[2].figure = plane;
-
-
-
-
-    g_objs[3].color.green = 1;
-    g_objs[3].color.red = 0;
-    g_objs[3].color.blue = 1;
-    g_objs[3].light_material = 1;
-    g_objs[3].light_ambiental = 0;
-    g_objs[3].specular_material = 1;
-    g_objs[3].specular_pow = 10;
-    g_objs[3].cutting_planes_length = 0;
-    g_objs[3].get_intersections = &get_polygon_intersection;
-    g_objs[3].get_normal_vector = &get_polygon_normal_vector;
-
-    plane = (Plane*) get_memory(sizeof(Plane), NULL);
-	plane->offset = -10;
-	plane->direction.x = 0;
-	plane->direction.y = 0;
-	plane->direction.z = 1;
-	Coord2D *vertex = (Coord2D*) get_memory(sizeof(Coord2D) * 3, NULL);
-	vertex[0].u = 250;
-	vertex[0].v = 250;
-	vertex[1].u = 350;
-	vertex[1].v = 250;
-	vertex[2].u = 320;
-	vertex[2].v = 450;
-    Polygon *poly = (Polygon*) get_memory(sizeof(Polygon), NULL);
-    poly->plane = *plane;
-    poly->vertex = vertex;
-    poly->vertex_amount = 3;
-    g_objs[3].figure = poly;
-
-
-
-
-    g_objs[4].color.green = 0;
-    g_objs[4].color.red = 1;
-    g_objs[4].color.blue = 0;
-    g_objs[4].light_material = 1;
-    g_objs[4].light_ambiental = 0.25;
-    g_objs[4].specular_material = 1;
-    g_objs[4].specular_pow = 10;
-    g_objs[4].cutting_planes_length = 0;
-    g_objs[4].get_intersections = &get_cylinder_intersection;
-    g_objs[4].get_normal_vector = &get_cylinder_normal_vector;
-
-    Cylinder *cyl = (Cylinder*) get_memory(sizeof(Cylinder), NULL);
-	cyl->direction.x = 0.57735;
-	cyl->direction.y = 0.57735;
-	cyl->direction.z = 0.57735;
-	cyl->anchor.x = 250;
-	cyl->anchor.y = 300;
-	cyl->anchor.z = 250;
-	cyl->radio = 100;
-	cyl->is_finite = 1;
-	cyl->front_length = 200;
-	cyl->back_length = -200;
-    g_objs[4].figure = cyl;
-
-
-
-
-
-    g_objs[5].color.green = 0;
-    g_objs[5].color.red = 1;
-    g_objs[5].color.blue = 1;
-    g_objs[5].light_material = 1;
-    g_objs[5].light_ambiental = 0.25;
-    g_objs[5].specular_material = 1;
-    g_objs[5].specular_pow = 10;
-    g_objs[5].cutting_planes_length = 0;
-    g_objs[5].get_intersections = &get_cone_intersection;
-    g_objs[5].get_normal_vector = &get_cone_normal_vector;
-
-    Cone *cone = (Cone*) get_memory(sizeof(Cone), NULL);
-	cone->direction.x = 0.57735;
-	cone->direction.y = -0.57735;
-	cone->direction.z = -0.57735;
-	cone->anchor.x = 300;
-	cone->anchor.y = 200;
-	cone->anchor.z = 100;
-	cone->radio = 0.5;
-	cone->is_finite = 1;
-	cone->front_length = 200;
-	cone->back_length = 0;
-    g_objs[5].figure = cone;
-
-
-
-
-    g_objs[6].color.green = 1;
-    g_objs[6].color.red = 1;
-    g_objs[6].color.blue = 1;
-    g_objs[6].light_material = 0.2;
-    g_objs[6].light_ambiental = 0;
-    g_objs[6].specular_material = 1;
-    g_objs[6].specular_pow = 10;
-    g_objs[6].cutting_planes_length = 0;
-    g_objs[6].get_intersections = &get_disc_intersection;
-    g_objs[6].get_normal_vector = &get_disc_normal_vector;
-
-    plane = (Plane*) get_memory(sizeof(Plane), NULL);
-	plane->offset = -10;
-	plane->direction.x = 0;
-	plane->direction.y = 0;
-	plane->direction.z = 1;
-    Disc *disc = (Disc*) get_memory(sizeof(Disc), NULL);
-    disc->plane = *plane;
-    disc->inner_focus1.x = 590;
-    disc->inner_focus1.y = 250;
-    disc->inner_focus1.z = -20;
-    disc->inner_focus2.x = 610;
-    disc->inner_focus2.y = 250;
-    disc->inner_focus2.z = -20;
-    disc->ext_focus1 = disc->inner_focus1;
-    disc->ext_focus2 = disc->inner_focus2;
-    disc->ext_focus1.x = 550;
-    disc->ext_focus2.x = 650;
-    disc->ext_focus2.y = 350;
-    disc->inner_dist = 100;
-    disc->ext_dist = 300;
-    g_objs[6].figure = disc;
-
-	/*char* objects_str = GetPropertyBeginning(buffer, OBJECTS_PROPERTY);
-	Object_Amount = strtold(GetPropertyBeginning(objects_str, OBJECT_AMOUNT_PROPERTY), NULL);
-	Scene_Objects = GetMemory(sizeof(OBJECT) * Object_Amount, NULL);
-	int object_index;
-	char* obj_str = objects_str;
-	for(object_index = 0; object_index < Object_Amount; object_index++)
-	{
-		obj_str = GetPropertyBeginning(obj_str, OBJECT_PROPERTY);
-		LoadObject(obj_str, object_index);
-	}*/
+    for(obj_i = 0; obj_i < g_objs_length; obj_i++)
+    {
+        obj_setting = config_setting_get_elem(objs_setting, obj_i);
+        curr_obj.light_ambiental = load_long_double(obj_setting, "light_ambiental");
+        curr_obj.light_material = load_long_double(obj_setting, "light_material");
+        curr_obj.specular_material = load_long_double(obj_setting, "specular_material");
+        curr_obj.specular_pow = load_long_double(obj_setting, "specular_pow");
+        color_setting = load_setting(obj_setting, "color");
+        curr_obj.color = load_color(color_setting);
+        // Cutting planes
+        planes_setting = load_setting(obj_setting, "cutting_planes");
+        curr_obj.cutting_planes_length = config_setting_length(planes_setting);
+        curr_obj.cutting_planes = (Plane*) get_memory(sizeof(Plane) * curr_obj.cutting_planes_length, NULL);
+        for(cut_plane_i = 0; cut_plane_i < curr_obj.cutting_planes_length; cut_plane_i++)
+        {
+            plane_setting = config_setting_get_elem(planes_setting, cut_plane_i);
+            cut_plane = load_plane(plane_setting, NULL);
+            curr_obj.cutting_planes[cut_plane_i] = *cut_plane;
+            free(cut_plane);
+        }
+        curr_obj.figure = load_figure(obj_setting, &curr_obj);
+        g_objs[obj_i] = curr_obj;
+    }
 }
 
 /*
  * Loads all the scene light sources and stores them in the 'g_lights' variable.
  * The size of the array will be stored in the 'g_lights_length' variable.
  */
-void load_lights(char* buffer)
+void load_lights(config_t *cfg)
 {
-    g_lights_length = 2;
-    g_lights = (Light*) get_memory(sizeof(Light) * 2, NULL);
-    g_lights->intensity = 1;
-    g_lights->color.green = 1;
-    g_lights->color.red = 1;
-    g_lights->color.blue = 1;
-    g_lights->const_att_factor = 1;
-    g_lights->lin_att_factor = 0;
-    g_lights->expo_att_factor = 0;
-    g_lights->anchor.x = 750;
-	g_lights->anchor.y = 750;
-	g_lights->anchor.z = -1000;
+    int light_i;
+    Light curr_light;
+    config_setting_t *src_setting, *light_setting, *color_setting, *anchor_setting;
 
-	g_lights[1].intensity = 0.5;
-    g_lights[1].color.green = 1;
-    g_lights[1].color.red = 1;
-    g_lights[1].color.blue = 1;
-    g_lights[1].const_att_factor = 1;
-    g_lights[1].lin_att_factor = 0;
-    g_lights[1].expo_att_factor = 0;
-    g_lights[1].anchor.x = 250;
-	g_lights[1].anchor.y = 300;
-	g_lights[1].anchor.z = 250;
+    src_setting = load_setting_from_cfg(cfg, "lights.sources");
+    g_lights_length = config_setting_length(src_setting);
+    g_lights = (Light*) get_memory(sizeof(Light) * g_lights_length, NULL);
+    for(light_i = 0; light_i < g_lights_length; light_i++)
+    {
+        light_setting = config_setting_get_elem(src_setting, light_i);
+        curr_light.intensity = load_long_double(light_setting, "intensity");
+        curr_light.const_att_factor = load_long_double(light_setting, "const_att_factor");
+        curr_light.lin_att_factor = load_long_double(light_setting, "lin_att_factor");
+        curr_light.expo_att_factor = load_long_double(light_setting, "expo_att_factor");
+        color_setting = load_setting(light_setting, "color");
+        anchor_setting = load_setting(light_setting, "anchor");
+        curr_light.anchor = load_vector(anchor_setting);
+        curr_light.color = load_color(color_setting);
+        g_lights[light_i] = curr_light;
+    }
 }
 
 /*
  * Loads the enviornmental light factor in the variable 'g_environment_light'
  */
-void load_environment_light(char* buffer)
+void load_environment_light(config_t *cfg)
 {
-	g_environment_light = 0.2;
+    config_setting_t *lights_setting = load_setting_from_cfg(cfg, "lights");
+    g_environment_light = load_long_double(lights_setting, "environment_light");
 }
 
 /*
-
-// Description:
-// Loads the enviornmental light factor in the variable 'Environment_Light'
-void LoadEnvironmentLight(char* buffer)
-{
-	char* environment_str = GetPropertyBeginning(buffer, ENVIRONMENT_LIGHT_PROPERTY);
-	Environment_Light = strtold(environment_str, NULL);
-}
-
-// Description:
-// Loads the general information of the next light in the 'buffer' in
-// the index 'light_index' on the 'Scene_Lights' array.
-void LoadLight(char* buffer, int light_index)
-{
-	LIGHT light;
-	light.color.red = strtold(GetPropertyBeginning(buffer, RED_PROPERTY), NULL);
-	light.color.green = strtold(GetPropertyBeginning(buffer, GREEN_PROPERTY), NULL);
-	light.color.blue = strtold(GetPropertyBeginning(buffer, BLUE_PROPERTY), NULL);
-	char* anchor_str = GetPropertyBeginning(buffer, LIGHT_ANCHOR_PROPERTY);
-	light.anchor.x = strtold(GetPropertyBeginning(anchor_str, X_PROPERTY), NULL);
-	light.anchor.y = strtold(GetPropertyBeginning(anchor_str, Y_PROPERTY), NULL);
-	light.anchor.z = strtold(GetPropertyBeginning(anchor_str, Z_PROPERTY), NULL);
-	light.intensity = strtold(GetPropertyBeginning(buffer, INTENSITY_PROPERTY), NULL);
-	light.exponential_att_factor = strtold(GetPropertyBeginning(buffer, EXP_ATT_FACTOR), NULL);
-	light.lineal_att_factor = strtold(GetPropertyBeginning(buffer, LIN_ATT_FACTOR), NULL);
-	light.const_att_factor = strtold(GetPropertyBeginning(buffer, CONST_ATT_FACTOR), NULL);
-	Scene_Lights[light_index] = light;
-}
-
-// Description:
-// Loads all the lights that appear in the scene and stores them in the
-// 'Scene_Lights' variable. The array size is stored in the 'Light_Amount'
-// variable.
-void LoadLights(char* buffer)
-{
-	char* lights_str = GetPropertyBeginning(buffer, LIGHTS_PROPERTY);
-	Light_Amount = strtold(GetPropertyBeginning(lights_str, LIGHT_AMOUNT_PROPERTY), NULL);
-	Scene_Lights = GetMemory(sizeof(LIGHT) * Light_Amount, NULL);
-	int light_index;
-	char* light_str = lights_str;
-	for(light_index = 0; light_index < Light_Amount; light_index++)
-	{
-		light_str = GetPropertyBeginning(light_str, LIGHT_PROPERTY);
-		LoadLight(light_str, light_index);
-	}
-}
-
-// Description:
-// Returns if the beginning of the buffer contains a given object type.
-int IsType(char* buffer, char* type)
-{
-	while(!(isspace(*buffer) || isspace(*type) || !type))
-		if(*(buffer++) != *(type++))
-			return false;
-	return (isspace(*buffer) && (isspace(*type) || !type));
-}
 
 // Description:
 // Creates a plane structure from the definition of a normal vector
@@ -749,29 +715,20 @@ void LoadObject(char* buffer, int object_index)
  */
 void load_scene(char* scene_file_path)
 {
-	//char *buffer = (char*) load_file(scene_file_path);
-	/*load_eye(NULL);
-	load_scene_window(NULL);
-	load_background(NULL);
-	load_objects(NULL);
-	load_lights(NULL);
-	load_environment_light(NULL);*/
-	//free(buffer);
-	config_t cfg;
-  config_setting_t *setting;
-  const char *str;
-
-  config_init(&cfg);
-
-  /* Read the file. If there is an error, report it and exit. */
-  if(! config_read_file(&cfg, "scene.cfg"))
-  {
-    fprintf(stderr, "%s:%d - %s\n", config_error_file(&cfg),
-            config_error_line(&cfg), config_error_text(&cfg));
-    config_destroy(&cfg);
-    return(EXIT_FAILURE);
-  }
-
+    config_t cfg;
+    config_setting_t *setting;
+    const char *str;
+    config_init(&cfg);
+    // Read the file. If there is an error, report it and exit.
+    if(! config_read_file(&cfg, scene_file_path))
+    {
+        fprintf(stderr, "%s:%d - %s\n", config_error_file(&cfg),
+        config_error_line(&cfg), config_error_text(&cfg));
+        config_destroy(&cfg);
+        print_error(MISSING_CONFIGURATION_FILE_ERROR);
+        exit(MISSING_CONFIGURATION_FILE_ERROR);
+    }
+/********************************EXAMPLE***********************************************/
   /* Get the store name. */
   if(config_lookup_string(&cfg, "name", &str))
     printf("Store name: %s\n\n", str);
@@ -834,7 +791,15 @@ void load_scene(char* scene_file_path)
     }
     putchar('\n');
   }
+/********************************EXAMPLE FINISHES***********************************************/
+    //char *buffer = (char*) load_file(scene_file_path);
+    load_eye(&cfg);
+    load_scene_window(&cfg);
+    load_background(&cfg);
+    load_objects(&cfg);
+    load_lights(&cfg);
+    load_environment_light(&cfg);
+    //free(buffer);
 
   config_destroy(&cfg);
-  return(EXIT_SUCCESS);
 }

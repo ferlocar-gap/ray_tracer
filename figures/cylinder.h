@@ -8,7 +8,7 @@
  *
  * direction: Axis where the cylinder is located.
  * anchor: Anchor from which the cylinder's back and front emerge.
- * radio: Radio of the cylinder.
+ * radius: Radius of the cylinder.
  * is_finite: False if the cylinder continues indefinitely. True if it has a
  *            front length and a back length.
  * front_length: Length at which the cylinder spreads towards the 'direction'
@@ -20,7 +20,7 @@ typedef struct
 {
 	Vector direction;
 	Vector anchor;
-	long double radio;
+	long double radius;
 	int is_finite;
 	long double front_length;
 	long double back_length;
