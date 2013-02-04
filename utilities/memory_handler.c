@@ -31,5 +31,4 @@ void* get_memory(unsigned long n, void (*error_routine)())
 			exit(MEMORY_ALLOCATION_ERROR);
 	}
 	return mem_pointer;
-	return 0;
 }

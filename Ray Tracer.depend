@@ -561,7 +561,7 @@
 	<string.h>
 	<stdlib.h>
 
-1359914871 source:c:\users\usuario\documents\github\ray_tracer\figures\cone.c
+1359926305 source:c:\users\usuario\documents\github\ray_tracer\figures\cone.c
 	<stdio.h>
 	<stdlib.h>
 	<math.h>
@@ -574,9 +574,9 @@
 
 1355002516 c:\users\usuario\documents\github\ray_tracer\utilities\memory_handler.h
 
-1357098658 c:\users\usuario\documents\github\ray_tracer\tracing\vector.h
+1359920498 c:\users\usuario\documents\github\ray_tracer\tracing\vector.h
 
-1359515943 c:\users\usuario\documents\github\ray_tracer\tracing\object.h
+1359927322 c:\users\usuario\documents\github\ray_tracer\tracing\object.h
 	"color.h"
 	"../figures/plane.h"
 
@@ -595,7 +595,7 @@
 1359914744 c:\users\usuario\documents\github\ray_tracer\figures\cone.h
 	"cylinder.h"
 
-1359914805 source:c:\users\usuario\documents\github\ray_tracer\figures\cylinder.c
+1359926024 source:c:\users\usuario\documents\github\ray_tracer\figures\cylinder.c
 	<stdio.h>
 	<stdlib.h>
 	<math.h>
@@ -661,7 +661,7 @@
 1359515282 c:\users\usuario\documents\github\ray_tracer\figures\sphere.h
 	"../tracing/vector.h"
 
-1359515786 source:c:\users\usuario\documents\github\ray_tracer\tracing\intersection.c
+1359923673 source:c:\users\usuario\documents\github\ray_tracer\tracing\intersection.c
 	<stdio.h>
 	<stdlib.h>
 	<math.h>
@@ -670,7 +670,7 @@
 	"intersection.h"
 	"object.h"
 
-1359515802 source:c:\users\usuario\documents\github\ray_tracer\tracing\light.c
+1359927527 source:c:\users\usuario\documents\github\ray_tracer\tracing\light.c
 	<stdio.h>
 	<stdlib.h>
 	<math.h>
@@ -680,18 +680,19 @@
 	"intersection.h"
 	"object.h"
 
-1359515933 c:\users\usuario\documents\github\ray_tracer\tracing\light.h
+1359921559 c:\users\usuario\documents\github\ray_tracer\tracing\light.h
 	"vector.h"
 	"color.h"
 	"intersection.h"
 
-1359515126 source:c:\users\usuario\documents\github\ray_tracer\tracing\vector.c
+1359923815 source:c:\users\usuario\documents\github\ray_tracer\tracing\vector.c
+	<stdlib.h>
 	<stdio.h>
 	<math.h>
 	"../utilities/memory_handler.h"
 	"vector.h"
 
-1359912294 source:c:\users\usuario\documents\github\ray_tracer\utilities\error_handler.c
+1359922732 source:c:\users\usuario\documents\github\ray_tracer\utilities\error_handler.c
 	<stdio.h>
 	<stdlib.h>
 	<libconfig.h>
@@ -706,15 +707,15 @@
 	"memory_handler.h"
 	"../tracing/color.h"
 
-1359515854 source:c:\users\usuario\documents\github\ray_tracer\utilities\memory_handler.c
+1359918525 source:c:\users\usuario\documents\github\ray_tracer\utilities\memory_handler.c
 	<stdio.h>
 	<stdlib.h>
 	"error_handler.h"
 
-1359912196 c:\users\usuario\documents\github\ray_tracer\utilities\error_handler.h
+1359922672 c:\users\usuario\documents\github\ray_tracer\utilities\error_handler.h
 	<libconfig.h>
 
-1359916943 source:c:\users\usuario\documents\github\ray_tracer\loading\scene_loader.c
+1359927274 source:c:\users\usuario\documents\github\ray_tracer\loading\scene_loader.c
 	<stdio.h>
 	<stdlib.h>
 	<libconfig.h>
@@ -736,7 +737,7 @@
 
 1355004758 c:\users\usuario\documents\github\ray_tracer\tracing\window.h
 
-1359911289 source:c:\users\usuario\documents\github\ray_tracer\ray_tracer.c
+1359926500 source:c:\users\usuario\documents\github\ray_tracer\ray_tracer.c
 	<stdio.h>
 	<stdlib.h>
 	<math.h>

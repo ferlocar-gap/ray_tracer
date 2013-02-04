@@ -5,6 +5,7 @@
  */
 
 // Headers
+#include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 #include "../utilities/memory_handler.h"
@@ -52,34 +53,37 @@ int is_one_distance(long double *distances)
  */
 long double* do_cuadratic_function(long double a, long double b, long double c)
 {
-	long double * distances = get_memory(sizeof(long double) * 2, NULL);
-	long double discr = pow(b, 2) - 4 * a * c;
+	long double discr, sqrt_discr, t1, t2;
+	long double * distances;
+
+	discr = pow(b, 2) - 4 * a * c;
 	// There isn't any intersection
-	if (discr < 0)
-		return NULL;
-	else
-	{
-		long double sqrt_disc = sqrt(discr);
-		long double t1 = (- b - sqrt_disc) / (2 * a);
-		long double t2 = (- b + sqrt_disc) / (2 * a);
-		// Object in front of us
-		if(t1 > 0 && t2 > 0)
-		{
-			distances[0] = t1;
-			distances[1] = t2;
-			return distances;
-		}
-		// Object behind us
-		else if(t1 < 0 && t2 < 0)
-			return NULL;
-		// We are inside the object!
-		else
-		{
-			distances[0] = t2;
-			distances[1] = t2;
-			return distances;
-		}
-	}
+	if (discr < 0) return NULL;
+	// Continues if there is at least one intersection
+    distances = get_memory(sizeof(long double) * 2, NULL);
+    sqrt_discr = sqrt(discr);
+    t1 = (- b - sqrt_discr) / (2 * a);
+    t2 = (- b + sqrt_discr) / (2 * a);
+    // Object in front of us
+    if(t1 > 0 && t2 > 0)
+    {
+        distances[0] = t1;
+        distances[1] = t2;
+        return distances;
+    }
+    // Object behind us
+    else if(t1 < 0 && t2 < 0)
+    {
+        free(distances);
+        return NULL;
+    }
+    // We are inside the object!
+    else
+    {
+        distances[0] = t2;
+        distances[1] = t2;
+        return distances;
+    }
 }
 
 /*
@@ -141,6 +145,21 @@ Vector multiply_vector(long double scalar_value, Vector vector)
 long double do_dot_product(Vector vec1, Vector vec2)
 {
 	return vec1.x * vec2.x + vec1.y * vec2.y + vec1.z * vec2.z;
+}
+
+/* Description:
+ * Returns a vector that is perpendicular to both vectors given.
+ *
+ * vec1: First vector.
+ * vec2: Second vector.
+ */
+Vector do_cross_product(Vector vec1, Vector vec2)
+{
+	Vector product;
+	product.x = (vec1.y * vec2.z) - (vec1.z * vec2.y);
+	product.y = (vec1.z * vec2.x) - (vec1.x * vec2.z);
+	product.z = (vec1.x * vec2.y) - (vec1.y * vec2.x);
+	return product;
 }
 
 /*

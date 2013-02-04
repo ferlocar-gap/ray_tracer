@@ -24,7 +24,6 @@
  */
 void* get_cone_intersection(Vector eye, Vector dir_vec, void* object_ptr, int *length)
 {
-    *length = 1;
 	Cone* cone_ptr =  (Cone*) ((Object*)object_ptr)->figure;
 	long double termQD, termQE;
 	Vector varD, varE, anchor_to_anchor;
@@ -59,5 +58,6 @@ Vector get_cone_normal_vector(Vector posn, void* cone_ptr)
 	if(do_dot_product(border, cone.direction) < 0)
 		distance *= -1;
 	normal_vec = multiply_vector(1.0/ fabsl(distance), subtract_vectors(posn, get_ray_position(cone.anchor, cone.direction, distance * sqrt(2))));
+	normalize_vector(&normal_vec);
 	return normal_vec;
 }

@@ -34,6 +34,7 @@ typedef struct
 	long double light_material;
 	long double light_ambiental;
 	long double specular_material;
+	long double mirror_material;
 	long double specular_pow;
 	Plane *cutting_planes;
 	int cutting_planes_length;

@@ -25,6 +25,6 @@ typedef struct
 	long double expo_att_factor;
 } Light;
 
-Color get_intersection_color(Vector eye, Vector dir_vec, Intersection *inter);
+Color get_color(Vector eye, Vector dir_vec, int mirror_level);
 
 #endif

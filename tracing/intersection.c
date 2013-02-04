@@ -114,10 +114,10 @@ Intersection* get_intersections(Vector eye, Vector dir_vec, int* length)
 		obj_inter_list = get_object_intersection(eye, dir_vec, g_objs[obj_index], &obj_inter_amount);
 		if(obj_inter_list)
 		{
-			// Special condition for shadows, to check for a distance larger than 0
 			for(obj_inter_i = 0; obj_inter_i < obj_inter_amount; obj_inter_i++)
             {
                 obj_inter = obj_inter_list[obj_inter_i];
+                // Special condition for shadows, to check for a distance larger than 0 (INTER_EPSILON)
                 if(obj_inter.is_valid && obj_inter.distance > INTER_EPSILON)
                 {
                     inter_list[inter_index++] = obj_inter;

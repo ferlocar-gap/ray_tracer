@@ -36,36 +36,16 @@ Vector g_eye;
 Color g_background;
 Object *g_objs;
 int g_objs_length;
-Light* g_lights;
+Light *g_lights;
 int g_lights_length;
 long double g_environment_light;
-int g_max_antialiase_level = 1;
+int g_max_mirror_level = 1;
+int g_max_antialiase_level = 2;
 CachedRay *g_ray_cache;
 int g_pixel_density;
 int g_row_ray_count;
 int g_cache_size;
 int g_current_row;
-
-/*
- * Returns the color that is seen from the position 'eye' when looking at the
- * tridimensional scene towards the direction 'dir_vec'.
- *
- * eye: Position from which the scene is seen.
- * dir_vec: Direction at which the eye is looking. This vector must be normalized.
- */
-Color get_color(Vector eye, Vector dir_vec)
-{
-	Intersection *inter_list;
-	Color color;
-	// Get intersections on the given direction. Intersections are ordered from the nearest to the farthest.
-	int inter_list_length;
-	inter_list = get_intersections(g_eye, dir_vec, &inter_list_length);
-	// If we don't find an intersection we return the background, otherwise we check for the intersections's color.
-	if (!inter_list) return g_background;
-	color = get_intersection_color(eye, dir_vec, inter_list);
-	free(inter_list);
-	return color;
-}
 
 /*
  * Returns the color that is seen from the position 'eye' when looking at the
@@ -103,7 +83,7 @@ Color get_ray_color(long double w_coord, long double h_coord, int width_res, int
         dir_vec.z = z_window - g_eye.z;
         normalize_vector(&dir_vec);
         // We save the color of the pixel
-        cached_ray.color = get_color(g_eye, dir_vec);
+        cached_ray.color = get_color(g_eye, dir_vec, 0);
         cached_ray.row = g_current_row;
     }
     g_ray_cache[cache_index] = cached_ray;
@@ -237,11 +217,12 @@ void paint_scene(int width_res, int height_res)
     }
     create_image(image_back_up, height_res, width_res);
     free(image_back_up);
+    free(g_ray_cache);
 }
 
 int main(int argc, char** argv)
 {
 	load_scene("scene.cfg");
-	paint_scene(400, 400);
+	paint_scene(800, 800);
 	return 0;
 }

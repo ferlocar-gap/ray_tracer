@@ -24,5 +24,6 @@ Vector get_ray_position(Vector anchor, Vector dir, long double distance);
 Vector subtract_vectors(Vector vector, Vector subtracting_vector);
 Vector multiply_vector(long double scalar_value, Vector vector);
 long double do_dot_product(Vector vec1, Vector vec2);
+Vector do_cross_product(Vector vec1, Vector vec2);
 
 #endif

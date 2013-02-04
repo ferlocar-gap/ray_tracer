@@ -17,8 +17,42 @@
 extern Light* g_lights;
 extern int g_lights_length;
 extern long double g_environment_light;
+extern Color g_background;
+extern int g_max_mirror_level;
 
 // Methods
+
+/*
+ * Adds two RGB colors.
+ *
+ * color1: Original color.
+ * color2. Color that we are adding to the original color.
+ */
+Color add_colors(Color color1, Color color2)
+{
+    color1.red += color2.red;
+    color1.green += color2.green;
+    color1.blue += color2.blue;
+    // Make overflow validation
+    if (color1.red > 1.0) color1.red = 1.0;
+    if (color1.green > 1.0) color1.green = 1.0;
+    if (color1.blue > 1.0) color1.blue = 1.0;
+    return color1;
+}
+
+/*
+ * Multiplies an RGB color by a scalar value.
+ *
+ * value: Scalar value by which the color is being multiplied
+ * color: Color being multiplied.
+ */
+Color multiply_color(long double value, Color color)
+{
+    color.red *= value;
+    color.green *= value;
+    color.blue *= value;
+    return color;
+}
 
 /*
  * Returns the normal vector of an intersection. The normal vector is already
@@ -53,15 +87,16 @@ long double get_attenuation_factor(Light light, long double distance)
  * (which includes specular light, shadows, transparency, etc)
  * light: Light for which the attenuation factor is calculated.
  * distance: Distance between the light and an illuminated spot.
+ * mirror_level: Current level of reflection.
  */
-Color get_intersection_color(Vector eye, Vector dir_vec, Intersection *inter)
+Color get_intersection_color(Vector eye, Vector dir_vec, Intersection *inter, int mirror_level)
 {
     int light_index;
     long double light_factor, light_distance, illum_cos, spec_light_factor,
                 att_factor, spec_cos;
-    Vector normal_vec, light_vec;
+    Vector normal_vec, light_vec, reverse_dir_vec, reflection_vec;
     Light light;
-    Color color_found;
+    Color color_found, reflection_color, final_color;
 
     // Light intensity
     light_factor = 0.0;
@@ -71,6 +106,8 @@ Color get_intersection_color(Vector eye, Vector dir_vec, Intersection *inter)
     // Pick up the normal vector that is pointing to the eye
     if(do_dot_product(normal_vec, dir_vec) > 0)
         normal_vec = multiply_vector(-1, normal_vec);
+    // Initialize reverse direction vector for mirrors and specular light
+    reverse_dir_vec = multiply_vector(-1, dir_vec);
     for(light_index = 0; light_index < g_lights_length; light_index++)
     {
         light = g_lights[light_index];
@@ -93,7 +130,6 @@ Color get_intersection_color(Vector eye, Vector dir_vec, Intersection *inter)
             // We only take it into account if the angle is lower than 90 degrees
             if(illum_cos > 0)
             {
-                Vector reverse_dir_vec = multiply_vector(-1, dir_vec);
                 Vector light_mirror_vec = subtract_vectors(multiply_vector(2 * illum_cos, normal_vec), light_vec);
                 // Attenuation factor, reduces the light energy depending on the distance
                 att_factor = get_attenuation_factor(light, light_distance);
@@ -120,11 +156,37 @@ Color get_intersection_color(Vector eye, Vector dir_vec, Intersection *inter)
     color_found.red *= light_factor;
     color_found.green *= light_factor;
     color_found.blue *= light_factor;
-
     // Specular light gives a color between enlightened color and the light color.
     color_found.red += (1 - color_found.red) * spec_light_factor;
     color_found.green += (1 - color_found.green) * spec_light_factor;
     color_found.blue += (1 - color_found.blue) * spec_light_factor;
+    long double mirror_factor = inter->obj.mirror_material;
+    if (mirror_level >= g_max_mirror_level || mirror_factor <= 0.0) return color_found;
+    // Get reflection color
+    reflection_vec = subtract_vectors(multiply_vector(2 * do_dot_product(normal_vec, reverse_dir_vec), normal_vec), reverse_dir_vec);
+    reflection_color = get_color(inter->posn, reflection_vec, mirror_level++);
+    final_color = add_colors(multiply_color(mirror_factor, reflection_color), multiply_color(1.0-mirror_factor, color_found));
+    return final_color;
+}
 
-    return color_found;
+/*
+ * Returns the color that is seen from the position 'eye' when looking at the
+ * tridimensional scene towards the direction 'dir_vec'.
+ *
+ * eye: Position from which the scene is seen.
+ * dir_vec: Direction at which the eye is looking. This vector must be normalized.
+ * mirror_level: Current level of reflection.
+ */
+Color get_color(Vector eye, Vector dir_vec, int mirror_level)
+{
+	Intersection *inter_list;
+	Color color;
+	// Get intersections on the given direction. Intersections are ordered from the nearest to the farthest.
+	int inter_list_length;
+	inter_list = get_intersections(eye, dir_vec, &inter_list_length);
+	// If we don't find an intersection we return the background, otherwise we check for the intersections's color.
+	if (!inter_list) return g_background;
+	color = get_intersection_color(eye, dir_vec, inter_list, mirror_level);
+	free(inter_list);
+	return color;
 }
