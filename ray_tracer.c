@@ -46,6 +46,7 @@ int g_pixel_density;
 int g_row_ray_count;
 int g_cache_size;
 int g_current_row;
+int g_max_transparency_level = 1;
 
 /*
  * Returns the color that is seen from the position 'eye' when looking at the

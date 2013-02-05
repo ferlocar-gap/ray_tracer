@@ -13,6 +13,8 @@
  * light_material: Factor for how much the material is affected by the light.
  * light_ambiental: Factor for how much the ambiental light affects the object.
  * specular_material: Factor for how much the material is affected by specular light.
+ * mirror_material: Factor for how much the material reflects other objects.
+ * transparency_material: Factor for how transparent is the material.
  * specular_pow: Factor for how big is the specular light spot. The larger the factor, the bigger the spot.
  * cutting_planes: Planes that cut the object.
  * cutting_planes_length: Number of planes that cut the object.
@@ -35,6 +37,7 @@ typedef struct
 	long double light_ambiental;
 	long double specular_material;
 	long double mirror_material;
+	long double transparency_material;
 	long double specular_pow;
 	Plane *cutting_planes;
 	int cutting_planes_length;
