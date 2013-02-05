@@ -19,7 +19,11 @@ typedef struct
 	Coord2D *vertex;
 } Polygon;
 
+typedef enum { X_AXIS, Y_AXIS, Z_AXIS} Axis;
+
 void* get_polygon_intersection(Vector eye, Vector dir_vec, void* object_ptr, int *length);
 Vector get_polygon_normal_vector(Vector posn, void* polygon_ptr);
+Coord2D transform_3d_to_2d(Vector point, Axis discarded_axis);
+Axis get_discarded_axis(Plane plane);
 
 #endif

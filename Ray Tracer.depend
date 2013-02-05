@@ -630,7 +630,7 @@
 	"../tracing/intersection.h"
 	"plane.h"
 
-1359515493 source:c:\users\usuario\documents\github\ray_tracer\figures\polygon.c
+1360029777 source:c:\users\usuario\documents\github\ray_tracer\figures\polygon.c
 	<stdio.h>
 	<stdlib.h>
 	<math.h>
@@ -641,7 +641,7 @@
 	"plane.h"
 	"polygon.h"
 
-1359515277 c:\users\usuario\documents\github\ray_tracer\figures\polygon.h
+1360030380 c:\users\usuario\documents\github\ray_tracer\figures\polygon.h
 	"../tracing/vector.h"
 	"plane.h"
 	"coord_2d.h"
@@ -670,7 +670,7 @@
 	"intersection.h"
 	"object.h"
 
-1359927527 source:c:\users\usuario\documents\github\ray_tracer\tracing\light.c
+1359948350 source:c:\users\usuario\documents\github\ray_tracer\tracing\light.c
 	<stdio.h>
 	<stdlib.h>
 	<math.h>
@@ -692,7 +692,7 @@
 	"../utilities/memory_handler.h"
 	"vector.h"
 
-1359922732 source:c:\users\usuario\documents\github\ray_tracer\utilities\error_handler.c
+1359948905 source:c:\users\usuario\documents\github\ray_tracer\utilities\error_handler.c
 	<stdio.h>
 	<stdlib.h>
 	<libconfig.h>
@@ -715,7 +715,7 @@
 1359922672 c:\users\usuario\documents\github\ray_tracer\utilities\error_handler.h
 	<libconfig.h>
 
-1359927274 source:c:\users\usuario\documents\github\ray_tracer\loading\scene_loader.c
+1360029350 source:c:\users\usuario\documents\github\ray_tracer\loading\scene_loader.c
 	<stdio.h>
 	<stdlib.h>
 	<libconfig.h>
@@ -737,7 +737,7 @@
 
 1355004758 c:\users\usuario\documents\github\ray_tracer\tracing\window.h
 
-1359926500 source:c:\users\usuario\documents\github\ray_tracer\ray_tracer.c
+1359948310 source:c:\users\usuario\documents\github\ray_tracer\ray_tracer.c
 	<stdio.h>
 	<stdlib.h>
 	<math.h>

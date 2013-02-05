@@ -14,8 +14,6 @@
 #include "plane.h"
 #include "polygon.h"
 
-typedef enum { X_AXIS, Y_AXIS, Z_AXIS} Axis;
-
 /*
  * Transforms a 3D point to a 2D coordinate.
  *
@@ -43,9 +41,6 @@ Coord2D transform_3d_to_2d(Vector point, Axis discarded_axis)
 	return vertex;
 }
 
-// Description:
-// Gets the coordinate that should be discarded if the plane is going
-// to be projected to only 2 dimensions. For example: X_Y, Z_Y or X_Z
 /*
  * Returns the axis that should be discarded if the plane were to exist in only
  * 2 dimensions. For example, the plane could be in any of these combinations:
@@ -53,7 +48,7 @@ Coord2D transform_3d_to_2d(Vector point, Axis discarded_axis)
  *
  * plane: Plane for which an axis needs to be discarded.
  */
-int get_discarded_axis(Plane plane)
+Axis get_discarded_axis(Plane plane)
 {
     Vector dir = plane.direction;
 	// We discard the coordinate with the highest absolute value.

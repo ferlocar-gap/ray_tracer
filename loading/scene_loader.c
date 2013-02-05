@@ -180,7 +180,7 @@ void load_background(config_t *cfg)
 }
 
 /*
- * Loads a sphere figure.
+ * Loads a sphere figure from a setting.
  *
  * sphere_setting: setting where the sphere is located.
  * obj: object where the sphere intersection and normal functions will be loaded.
@@ -204,36 +204,70 @@ Sphere* load_sphere(config_setting_t *sphere_setting, Object *obj)
 }
 
 /*
- * Loads a plane figure.
+ * Creates a plane figure using a direction vector and a 3D anchor.
+ *
+ * dir_vec: Direction at which the plane is looking.
+ * anchor: Single 3D point that is located inside the plane.
+ * with_inversion: True if the direction of the plane should be looking to the
+ *                 scene eye. Cutting planes should disable this option.
+ */
+Plane create_plane_with_inversion(Vector dir_vec, Vector anchor, int with_inversion)
+{
+    Plane plane;
+    Vector eye_dir;
+    int dir_length;
+
+    plane.offset = - do_dot_product(dir_vec, anchor);
+    dir_length = normalize_vector(&dir_vec);
+    plane.offset /= dir_length;
+    plane.direction = dir_vec;
+    // Make sure the normal vector of the plane is facing the eye
+    if(with_inversion)
+    {
+        eye_dir = subtract_vectors(anchor, g_eye);
+        normalize_vector(&eye_dir);
+        if(do_dot_product(eye_dir, plane.direction))
+        {
+            plane.offset *= -1;
+            plane.direction = multiply_vector(-1, plane.direction);
+        }
+    }
+    return plane;
+}
+
+/*
+ * Creates a plane figure using a direction vector and a 3D anchor.
+ * This functions makes sure that the plane normal is looking towards the eye.
+ *
+ * dir_vec: Direction at which the plane is looking.
+ * anchor: Single 3D point that is located inside the plane.
+ */
+Plane create_plane(Vector dir_vec, Vector anchor)
+{
+    return create_plane_with_inversion(dir_vec, anchor, 1);
+}
+
+/*
+ * Loads a plane figure from a setting.
  *
  * plane_setting: setting where the plane is located.
  * obj: object where the plane intersection and normal functions will be loaded.
  *      If the parameter comes null, the functions will not be assigned.
+ * with_inversion: True if the direction of the plane should be looking to the
+ *                 scene eye. Cutting planes should disable this option.
  */
-Plane* load_plane(config_setting_t *plane_setting, Object *obj)
+Plane* load_plane_with_inversion(config_setting_t *plane_setting, Object *obj, int with_inversion)
 {
     Plane *plane;
     config_setting_t *dir_setting, *anchor_setting;
-    Vector direction, anchor, eye_dir;
-    long double dir_length;
+    Vector direction, anchor;
 
     plane = (Plane*) get_memory(sizeof(Plane), NULL);
 	anchor_setting = load_setting(plane_setting, "anchor");
 	dir_setting = load_setting(plane_setting, "direction");
 	direction = load_vector(dir_setting);
 	anchor = load_vector(anchor_setting);
-	plane->offset = - do_dot_product(direction, anchor);
-	dir_length = normalize_vector(&direction);
-	plane->offset /= dir_length;
-	plane->direction = direction;
-	// Make validation to make sure the normal vector is facing the eye.
-	eye_dir = subtract_vectors(anchor, g_eye);
-    normalize_vector(&eye_dir);
-    if(do_dot_product(eye_dir, direction) >= 0)
-    {
-        plane->offset *= -1;
-        plane->direction = multiply_vector(-1, plane->direction);
-    }
+	*plane = create_plane_with_inversion(direction, anchor, with_inversion);
     if(obj)
     {
         obj->get_intersections = &get_plane_intersection;
@@ -243,7 +277,20 @@ Plane* load_plane(config_setting_t *plane_setting, Object *obj)
 }
 
 /*
- * Loads a polygon figure.
+ * Loads a plane figure from a setting.
+ * This functions makes sure that the plane normal is looking towards the eye.
+ *
+ * plane_setting: setting where the plane is located.
+ * obj: object where the plane intersection and normal functions will be loaded.
+ *      If the parameter comes null, the functions will not be assigned.
+ */
+Plane* load_plane(config_setting_t *plane_setting, Object *obj)
+{
+    return load_plane_with_inversion(plane_setting, obj, 1);
+}
+
+/*
+ * Loads a polygon figure from a setting.
  *
  * polygon_setting: setting where the polygon is located.
  * obj: object where the polygon intersection and normal functions will be loaded.
@@ -252,26 +299,34 @@ Plane* load_plane(config_setting_t *plane_setting, Object *obj)
 Polygon* load_polygon(config_setting_t *polygon_setting, Object *obj)
 {
     Polygon *polygon;
-    Plane *poly_plane;
     int vertex_i;
-    config_setting_t *plane_setting, *all_vertex_setting, *vertex_setting;
+    Axis discarded_axis;
+    Vector *poly_points;
+    Vector plane_dir_vec, vec1, vec2;
+    config_setting_t *all_vertex_setting, *vertex_setting;
 
     polygon = (Polygon*)get_memory(sizeof(Polygon), NULL);
-    plane_setting = load_setting(polygon_setting, "plane");
-    poly_plane = load_plane(plane_setting, NULL);
-    polygon->plane = *poly_plane;
-    free(poly_plane);
     all_vertex_setting = load_setting(polygon_setting, "vertex");
     polygon->vertex_amount = config_setting_length(all_vertex_setting);
     if(polygon->vertex_amount >= 3)
     {
+        // Load vertex
         polygon->vertex = (Coord2D*) get_memory(sizeof(Coord2D) * polygon->vertex_amount, NULL);
+        poly_points = (Vector*) get_memory(sizeof(Vector) * polygon->vertex_amount, NULL);
         for(vertex_i = 0; vertex_i < polygon->vertex_amount; vertex_i++)
         {
             vertex_setting = config_setting_get_elem(all_vertex_setting, vertex_i);
-            polygon->vertex[vertex_i].u = load_long_double(vertex_setting, "u");
-            polygon->vertex[vertex_i].v = load_long_double(vertex_setting, "v");
+            poly_points[vertex_i] = load_vector(vertex_setting);
         }
+        // Load plane using first 3 vertex
+        vec1 = subtract_vectors(poly_points[1], poly_points[0]);
+        vec2 = subtract_vectors(poly_points[2], poly_points[0]);
+        plane_dir_vec = do_cross_product(vec1, vec2);
+        polygon->plane = create_plane(plane_dir_vec, poly_points[0]);
+        discarded_axis = get_discarded_axis(polygon->plane);
+        // Map 3d vertex to 2d vertex
+        for(vertex_i = 0; vertex_i < polygon->vertex_amount; vertex_i++)
+            polygon->vertex[vertex_i] = transform_3d_to_2d(poly_points[vertex_i], discarded_axis);
     }
     else
     {
@@ -287,7 +342,7 @@ Polygon* load_polygon(config_setting_t *polygon_setting, Object *obj)
 }
 
 /*
- * Loads a disc figure.
+ * Loads a disc figure from a setting.
  *
  * disc_setting: setting where the disc is located.
  * obj: object where the disc intersection and normal functions will be loaded.
@@ -296,14 +351,10 @@ Polygon* load_polygon(config_setting_t *polygon_setting, Object *obj)
 Disc* load_disc(config_setting_t *disc_setting, Object *obj)
 {
     Disc *disc;
-    Plane *disc_plane;
-    config_setting_t *plane_sett, *in_focus1_sett, *in_focus2_sett, *ext_focus1_sett, *ext_focus2_sett;
+    Vector plane_dir_vec, vec1, vec2;
+    config_setting_t *in_focus1_sett, *in_focus2_sett, *ext_focus1_sett, *ext_focus2_sett;
 
     disc = (Disc*) get_memory(sizeof(Disc), NULL);
-    plane_sett = load_setting(disc_setting, "plane");
-    disc_plane = load_plane(plane_sett, NULL);
-    disc->plane = *disc_plane;
-    free(disc_plane);
     in_focus1_sett = load_setting(disc_setting, "inner_focus1");
     in_focus2_sett = load_setting(disc_setting, "inner_focus2");
     ext_focus1_sett = load_setting(disc_setting, "external_focus1");
@@ -314,6 +365,11 @@ Disc* load_disc(config_setting_t *disc_setting, Object *obj)
     disc->ext_focus2 = load_vector(ext_focus2_sett);
     disc->inner_dist = load_long_double(disc_setting, "inner_distance");
     disc->ext_dist = load_long_double(disc_setting, "external_distance");
+    // Load plane using focus points
+    vec1 = subtract_vectors(disc->ext_focus2, disc->ext_focus1);
+    vec2 = subtract_vectors(disc->inner_focus1, disc->ext_focus1);
+    plane_dir_vec = do_cross_product(vec1, vec2);
+    disc->plane = create_plane(plane_dir_vec, disc->ext_focus1);
     if(obj)
     {
         obj->get_intersections = &get_disc_intersection;
@@ -323,7 +379,7 @@ Disc* load_disc(config_setting_t *disc_setting, Object *obj)
 }
 
 /*
- * Loads a cylinder figure.
+ * Loads a cylinder figure from a setting.
  *
  * cylinder_setting: setting where the cylinder is located.
  * obj: object where the cylinder intersection and normal functions will be loaded.
@@ -353,7 +409,7 @@ Cylinder* load_cylinder(config_setting_t *cylinder_setting, Object *obj)
 }
 
 /*
- * Loads a cone figure.
+ * Loads a cone figure from a setting.
  *
  * cone_setting: setting where the cone is located.
  * obj: object where the cone intersection and normal functions will be loaded.
@@ -371,7 +427,7 @@ Cone* load_cone(config_setting_t *cone_setting, Object *obj)
 }
 
 /*
- * Loads the figure of an object
+ * Loads the figure of an object from a setting.
  *
  * obj_setting: object setting where the figure is located.
  * obj: object where the figure functions will be loaded.
