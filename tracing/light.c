@@ -98,9 +98,10 @@ Color get_intersection_color(Vector eye,
                              int transparency_level)
 {
     Intersection inter;
-    int light_index;
+    int light_index, shadow_inter_length, shadow_i;
     long double light_factor, light_distance, illum_cos, spec_light_factor,
-                att_factor, spec_cos, mirror_factor, transparency_factor;
+                att_factor, spec_cos, mirror_factor, transparency_factor,
+                light_str;
     Vector normal_vec, light_vec, rev_dir_vec, reflection_vec;
     Light light;
     Color color_found, reflection_color, transparency_color, final_color;
@@ -124,12 +125,21 @@ Color get_intersection_color(Vector eye,
         light_vec = subtract_vectors(light.anchor, inter.posn);
         light_distance = normalize_vector(&light_vec);
         // We check for any object making a shadow from that light
-        Intersection* shadow_inter = get_intersections(inter.posn, light_vec, NULL);
+        light_str = 1.0;
+        Intersection* shadow_inter = get_intersections(inter.posn, light_vec, &shadow_inter_length);
         // If the intersection is beyond the light source, we ignore it
-        if(shadow_inter && shadow_inter->distance >= light_distance)
+        if(shadow_inter)
         {   // Object(s) is/are actually behind the light
-            free(shadow_inter);
-            shadow_inter = NULL;
+            for(shadow_i = 0; shadow_i < shadow_inter_length && light_str > 0.0; shadow_i++)
+            {
+                if(shadow_inter[shadow_i].distance < light_distance)
+                    light_str *= shadow_inter[shadow_i].obj.translucency_material;
+            }
+            if(light_str > 0.0)
+            {
+                free(shadow_inter);
+                shadow_inter = NULL;
+            }
         }
         // If there aren't any shadows
         if(!shadow_inter)
@@ -143,7 +153,8 @@ Color get_intersection_color(Vector eye,
                 att_factor = get_attenuation_factor(light, light_distance);
                 spec_cos = do_dot_product(rev_dir_vec, light_mirror_vec);
                 // We add the light source effect
-                light_factor += illum_cos * light.intensity * inter.obj.light_material * att_factor;
+                light_str *= light.intensity;
+                light_factor += illum_cos * light_str * inter.obj.light_material * att_factor;
                 // The specular light, is the white stain on the objects
                 if(spec_cos > 0)
                 {
