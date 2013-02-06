@@ -492,7 +492,6 @@ void load_objects(config_t *cfg)
         curr_obj.specular_material = load_long_double(obj_setting, "specular_material");
         curr_obj.mirror_material = load_long_double(obj_setting, "mirror_material");
         curr_obj.transparency_material = load_long_double(obj_setting, "transparency_material");
-        curr_obj.translucency_material = load_long_double(obj_setting, "translucency_material");
         curr_obj.specular_pow = load_long_double(obj_setting, "specular_pow");
         color_setting = load_setting(obj_setting, "color");
         curr_obj.color = load_color(color_setting);
