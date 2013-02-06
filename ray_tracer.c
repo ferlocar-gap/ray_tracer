@@ -38,7 +38,7 @@ Object *g_objs;
 int g_objs_length;
 Light *g_lights;
 int g_lights_length;
-long double g_environment_light;
+Color g_environment_light;
 int g_max_mirror_level = 1;
 int g_max_antialiase_level = 2;
 CachedRay *g_ray_cache;

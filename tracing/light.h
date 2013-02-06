@@ -8,8 +8,7 @@
 /*
  * Represents a light source on the scene.
  *
- * intensity: Factor for the light brightness. Must be between 0 and 1.
- * color: Color of the light.
+ * color: Color of the light. It works as the intensity as well.
  * anchor: Position of the light.
  * const_att_factor: Constant distance attenuation factor.
  * lin_att_factor: Lineal distance attenuation factor.
@@ -17,7 +16,6 @@
  */
 typedef struct
 {
-	long double intensity;
     Color color;
 	Vector anchor;
 	long double const_att_factor;

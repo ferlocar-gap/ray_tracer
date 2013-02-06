@@ -41,7 +41,7 @@ extern Object *g_objs;
 extern int g_objs_length;
 extern Light *g_lights;
 extern int g_lights_length;
-extern long double g_environment_light;
+extern Color g_environment_light;
 
 // Methods
 
@@ -534,7 +534,6 @@ void load_lights(config_t *cfg)
     for(light_i = 0; light_i < g_lights_length; light_i++)
     {
         light_setting = config_setting_get_elem(src_setting, light_i);
-        curr_light.intensity = load_long_double(light_setting, "intensity");
         curr_light.const_att_factor = load_long_double(light_setting, "const_att_factor");
         curr_light.lin_att_factor = load_long_double(light_setting, "lin_att_factor");
         curr_light.expo_att_factor = load_long_double(light_setting, "expo_att_factor");
@@ -553,8 +552,8 @@ void load_lights(config_t *cfg)
  */
 void load_environment_light(config_t *cfg)
 {
-    config_setting_t *lights_setting = load_setting_from_cfg(cfg, "lights");
-    g_environment_light = load_long_double(lights_setting, "environment_light");
+    config_setting_t *environment_setting = load_setting_from_cfg(cfg, "lights.environment_light");
+    g_environment_light = load_color(environment_setting);
 }
 
 /*

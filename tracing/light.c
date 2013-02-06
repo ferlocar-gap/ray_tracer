@@ -16,12 +16,45 @@
 
 extern Light* g_lights;
 extern int g_lights_length;
-extern long double g_environment_light;
+extern Color g_environment_light;
 extern Color g_background;
 extern int g_max_mirror_level;
 extern int g_max_transparency_level;
 
 // Methods
+
+/*
+ * Returns an empty color.
+ */
+Color get_empty_color()
+{
+    return (Color){ .red = 0.0, .green = 0.0, .blue = 0.0 };
+}
+
+/*
+ * Returns true if the R, G, and B values of the color are 0.
+ *
+ * color: Color being evaluated.
+ */
+int is_color_empty(Color color)
+{
+    return color.red == 0.0 && color.green == 0.0 && color.blue == 0.0;
+}
+
+/*
+ * Makes a color overflow validation. If any value of the color surpasses 1,
+ * that value is changed to one. It returns the non-overflowing color.
+ *
+ * color: Color being validated.
+ */
+Color validate_color(Color color)
+{
+    // Make overflow validation
+    if (color.red > 1.0) color.red = 1.0;
+    if (color.green > 1.0) color.green = 1.0;
+    if (color.blue > 1.0) color.blue = 1.0;
+    return color;
+}
 
 /*
  * Adds two RGB colors.
@@ -35,10 +68,22 @@ Color add_colors(Color color1, Color color2)
     color1.green += color2.green;
     color1.blue += color2.blue;
     // Make overflow validation
-    if (color1.red > 1.0) color1.red = 1.0;
-    if (color1.green > 1.0) color1.green = 1.0;
-    if (color1.blue > 1.0) color1.blue = 1.0;
-    return color1;
+    return validate_color(color1);
+}
+
+/*
+ * Multiplies two RGB colors.
+ *
+ * color1: Original color.
+ * color2. Color by which the original color is being multiplied.
+ */
+Color multiply_colors(Color color1, Color color2)
+{
+    color1.red *= color2.red;
+    color1.green *= color2.green;
+    color1.blue *= color2.blue;
+    // Make overflow validation
+    return validate_color(color1);
 }
 
 /*
@@ -52,7 +97,8 @@ Color multiply_color(long double value, Color color)
     color.red *= value;
     color.green *= value;
     color.blue *= value;
-    return color;
+    // Make overflow validation
+    return validate_color(color);
 }
 
 /*
@@ -99,16 +145,17 @@ Color get_intersection_color(Vector eye,
 {
     Intersection inter;
     int light_index, shadow_inter_length, shadow_i;
-    long double light_factor, light_distance, illum_cos, spec_light_factor,
-                att_factor, spec_cos, mirror_factor, transparency_factor,
-                light_str;
+    Object shadow_obj;
+    long double light_distance, illum_cos, spec_light_factor, att_factor,
+                spec_cos, mirror_factor, transparency_factor;
     Vector normal_vec, light_vec, rev_dir_vec, reflection_vec;
     Light light;
-    Color color_found, reflection_color, transparency_color, final_color;
+    Color all_lights_color, color_found, light_filter, reflection_color,
+          transparency_color, final_color;
 
     inter = inter_list[transparency_level];
     // Light intensity
-    light_factor = 0.0;
+    all_lights_color = (Color){ .red = 0.0, .green = 0.0, .blue = 0.0 };
     // Specular light intensity
     spec_light_factor = 0.0;
     normal_vec = get_normal_vector(&inter);
@@ -125,17 +172,28 @@ Color get_intersection_color(Vector eye,
         light_vec = subtract_vectors(light.anchor, inter.posn);
         light_distance = normalize_vector(&light_vec);
         // We check for any object making a shadow from that light
-        light_str = 1.0;
+        light_filter = (Color){ .red = 1.0, .green = 1.0, .blue = 1.0 };;
         Intersection* shadow_inter = get_intersections(inter.posn, light_vec, &shadow_inter_length);
         // If the intersection is beyond the light source, we ignore it
         if(shadow_inter)
         {   // Object(s) is/are actually behind the light
-            for(shadow_i = 0; shadow_i < shadow_inter_length && light_str > 0.0; shadow_i++)
+            for(shadow_i = 0; shadow_i < shadow_inter_length && !is_color_empty(light_filter); shadow_i++)
             {
                 if(shadow_inter[shadow_i].distance < light_distance)
-                    light_str *= shadow_inter[shadow_i].obj.translucency_material;
+                {
+                    shadow_obj = shadow_inter[shadow_i].obj;
+                    if(shadow_obj.translucency_material)
+                    {
+                        light_filter = multiply_color(shadow_obj.translucency_material, multiply_colors(light_filter, shadow_obj.color));
+                    }
+                    else
+                    {
+                        light_filter = get_empty_color();
+                    }
+                }
+
             }
-            if(light_str > 0.0)
+            if(!is_color_empty(light_filter))
             {
                 free(shadow_inter);
                 shadow_inter = NULL;
@@ -153,8 +211,8 @@ Color get_intersection_color(Vector eye,
                 att_factor = get_attenuation_factor(light, light_distance);
                 spec_cos = do_dot_product(rev_dir_vec, light_mirror_vec);
                 // We add the light source effect
-                light_str *= light.intensity;
-                light_factor += illum_cos * light_str * inter.obj.light_material * att_factor;
+                light_filter = multiply_color(illum_cos * inter.obj.light_material * att_factor, light_filter);
+                all_lights_color = add_colors(all_lights_color, multiply_colors(light_filter, light.color));
                 // The specular light, is the white stain on the objects
                 if(spec_cos > 0)
                 {
@@ -166,12 +224,10 @@ Color get_intersection_color(Vector eye,
         else free(shadow_inter);
     }
     // We add the environmental light of the scene
-    light_factor += g_environment_light * inter.obj.light_ambiental;
-    if(light_factor > 1.0)
-        light_factor = 1.0;
+    all_lights_color = add_colors(all_lights_color, multiply_color(inter.obj.light_ambiental, g_environment_light));
     if(spec_light_factor > 1.0)
         spec_light_factor = 1.0;
-    color_found = multiply_color(light_factor, inter.obj.color);
+    color_found = multiply_colors(all_lights_color, inter.obj.color);
     // Specular light gives a color between enlightened color and the light color.
     color_found.red += (1 - color_found.red) * spec_light_factor;
     color_found.green += (1 - color_found.green) * spec_light_factor;
@@ -193,7 +249,7 @@ Color get_intersection_color(Vector eye,
     else
     {
         transparency_factor = 0.0;
-        transparency_color = (Color){ .red = 0.0, .green = 0.0, .blue = 0.0 };
+        transparency_color = get_empty_color();
     }
     // Get reflection color
     mirror_factor = inter.obj.mirror_material;
@@ -206,7 +262,7 @@ Color get_intersection_color(Vector eye,
     else
     {
         mirror_factor = 0;
-        reflection_color = (Color){ .red = 0.0, .green = 0.0, .blue = 0.0 };
+        reflection_color = get_empty_color();
     }
     // Calculate final color
     transparency_color = multiply_color(transparency_factor, transparency_color);
