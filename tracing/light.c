@@ -8,18 +8,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include "../scene_config.h"
 #include "color.h"
 #include "light.h"
 #include "vector.h"
 #include "intersection.h"
 #include "object.h"
 
-extern Light* g_lights;
-extern int g_lights_length;
-extern Color g_environment_light;
-extern Color g_background;
-extern int g_max_mirror_level;
-extern int g_max_transparency_level;
+extern SceneConfig g_conf;
 
 // Methods
 
@@ -164,9 +160,9 @@ Color get_intersection_color(Vector eye,
         normal_vec = multiply_vector(-1, normal_vec);
     // Initialize reverse direction vector for mirrors and specular light
     rev_dir_vec = multiply_vector(-1, dir_vec);
-    for(light_index = 0; light_index < g_lights_length; light_index++)
+    for(light_index = 0; light_index < g_conf.lights_length; light_index++)
     {
-        light = g_lights[light_index];
+        light = g_conf.lights[light_index];
         // Find the vector that points from the intersection point to the light
         // source, and normalize it
         light_vec = subtract_vectors(light.anchor, inter.posn);
@@ -224,7 +220,7 @@ Color get_intersection_color(Vector eye,
         else free(shadow_inter);
     }
     // We add the environmental light of the scene
-    all_lights_color = add_colors(all_lights_color, multiply_color(inter.obj.light_ambiental, g_environment_light));
+    all_lights_color = add_colors(all_lights_color, multiply_color(inter.obj.light_ambiental, g_conf.environment_light));
     if(spec_light_factor > 1.0)
         spec_light_factor = 1.0;
     color_found = multiply_colors(all_lights_color, inter.obj.color);
@@ -234,7 +230,7 @@ Color get_intersection_color(Vector eye,
     color_found.blue += (1 - color_found.blue) * spec_light_factor;
     // Get transparency color
     transparency_factor = inter.obj.transparency_material;
-    if (transparency_level < g_max_transparency_level &&
+    if (transparency_level < g_conf.max_transparency_level &&
         transparency_factor > 0.0)
     {
         if(transparency_level + 1 < inter_length)
@@ -243,7 +239,7 @@ Color get_intersection_color(Vector eye,
         }
         else
         {
-            transparency_color = g_background;
+            transparency_color = g_conf.background;
         }
     }
     else
@@ -253,7 +249,7 @@ Color get_intersection_color(Vector eye,
     }
     // Get reflection color
     mirror_factor = inter.obj.mirror_material;
-    if (mirror_level < g_max_mirror_level &&
+    if (mirror_level < g_conf.max_mirror_level &&
         mirror_factor > 0.0)
     {
         reflection_vec = subtract_vectors(multiply_vector(2 * do_dot_product(normal_vec, rev_dir_vec), normal_vec), rev_dir_vec);
@@ -288,7 +284,7 @@ Color get_color(Vector eye, Vector dir_vec, int mirror_level)
 	int inter_list_length;
 	inter_list = get_intersections(eye, dir_vec, &inter_list_length);
 	// If we don't find an intersection we return the background, otherwise we check for the intersections's color.
-	if (!inter_list) return g_background;
+	if (!inter_list) return g_conf.background;
 	color = get_intersection_color(eye, dir_vec, inter_list, inter_list_length, mirror_level, 0);
 	free(inter_list);
 	return color;

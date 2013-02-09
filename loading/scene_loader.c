@@ -10,6 +10,8 @@
 #include <stdlib.h>
 #include <libconfig.h>
 #include <ctype.h>
+#include <math.h>
+#include "../scene_config.h"
 #include "../utilities/memory_handler.h"
 #include "../utilities/error_handler.h"
 #include "../tracing/vector.h"
@@ -34,14 +36,7 @@
 #define CONE_CODE 5
 
 // Global variables
-extern Window g_window;
-extern Vector g_eye;
-extern Color g_background;
-extern Object *g_objs;
-extern int g_objs_length;
-extern Light *g_lights;
-extern int g_lights_length;
-extern Color g_environment_light;
+extern SceneConfig g_conf;
 
 // Methods
 
@@ -143,40 +138,40 @@ Color load_color(config_setting_t *setting)
 }
 
 /*
- * Loads the eye position in the 'g_eye' variable.
+ * Loads the eye position in the 'g_conf.eye' variable.
  *
  * cfg: loaded configuration file.
  */
 void load_eye(config_t *cfg)
 {
     config_setting_t *eye_setting = load_setting_from_cfg(cfg, "eye");
-    g_eye = load_vector(eye_setting);
+    g_conf.eye = load_vector(eye_setting);
 }
 
 /*
- * Loads the window position in the 'g_window' variable.
+ * Loads the window position in the 'g_conf.window' variable.
  *
  * cfg: loaded configuration file.
  */
 void load_scene_window(config_t *cfg)
 {
     config_setting_t *win_setting = load_setting_from_cfg(cfg, "window");
-    g_window.x_min = load_long_double(win_setting, "x_min");
-    g_window.y_min = load_long_double(win_setting, "y_min");
-    g_window.x_max = load_long_double(win_setting, "x_max");
-    g_window.y_max = load_long_double(win_setting, "y_max");
-    g_window.z_anchor = load_long_double(win_setting, "z_anchor");
+    g_conf.window.x_min = load_long_double(win_setting, "x_min");
+    g_conf.window.y_min = load_long_double(win_setting, "y_min");
+    g_conf.window.x_max = load_long_double(win_setting, "x_max");
+    g_conf.window.y_max = load_long_double(win_setting, "y_max");
+    g_conf.window.z_anchor = load_long_double(win_setting, "z_anchor");
 }
 
 /*
- * Loads the background color in the 'g_background' variable.
+ * Loads the background color in the 'g_conf.background' variable.
  *
  * cfg: loaded configuration file.
  */
 void load_background(config_t *cfg)
 {
     config_setting_t *bg_setting = load_setting_from_cfg(cfg, "background");
-    g_background = load_color(bg_setting);
+    g_conf.background = load_color(bg_setting);
 }
 
 /*
@@ -224,7 +219,7 @@ Plane create_plane_with_inversion(Vector dir_vec, Vector anchor, int with_invers
     // Make sure the normal vector of the plane is facing the eye
     if(with_inversion)
     {
-        eye_dir = subtract_vectors(anchor, g_eye);
+        eye_dir = subtract_vectors(anchor, g_conf.eye);
         normalize_vector(&eye_dir);
         if(do_dot_product(eye_dir, plane.direction))
         {
@@ -468,8 +463,8 @@ void* load_figure(config_setting_t *obj_setting, Object *obj)
  }
 
 /*
- * Loads all the scene objects and stores them in the 'g_objs' variable. The
- * size of the array will be stored in the 'g_objs_length' variable.
+ * Loads all the scene objects and stores them in the 'g_conf.objs' variable. The
+ * size of the array will be stored in the 'g_conf.objs_length' variable.
  *
  * cfg: loaded configuration file.
  */
@@ -481,10 +476,10 @@ void load_objects(config_t *cfg)
     config_setting_t *objs_setting, *obj_setting, *color_setting, *planes_setting, *plane_setting;
 
     objs_setting = load_setting_from_cfg(cfg, "objects");
-    g_objs_length = config_setting_length(objs_setting);
-    if(!g_objs_length) return;
-    g_objs = (Object*) get_memory(sizeof(Object)*g_objs_length, NULL);
-    for(obj_i = 0; obj_i < g_objs_length; obj_i++)
+    g_conf.objs_length = config_setting_length(objs_setting);
+    if(!g_conf.objs_length) return;
+    g_conf.objs = (Object*) get_memory(sizeof(Object)*g_conf.objs_length, NULL);
+    for(obj_i = 0; obj_i < g_conf.objs_length; obj_i++)
     {
         obj_setting = config_setting_get_elem(objs_setting, obj_i);
         curr_obj.light_ambiental = load_long_double(obj_setting, "light_ambiental");
@@ -511,13 +506,13 @@ void load_objects(config_t *cfg)
             }
         }
         curr_obj.figure = load_figure(obj_setting, &curr_obj);
-        g_objs[obj_i] = curr_obj;
+        g_conf.objs[obj_i] = curr_obj;
     }
 }
 
 /*
- * Loads all the scene light sources and stores them in the 'g_lights' variable.
- * The size of the array will be stored in the 'g_lights_length' variable.
+ * Loads all the scene light sources and stores them in the 'g_conf.lights' variable.
+ * The size of the array will be stored in the 'g_conf.lights_length' variable.
  *
  * cfg: loaded configuration file.
  */
@@ -528,10 +523,10 @@ void load_lights(config_t *cfg)
     config_setting_t *src_setting, *light_setting, *color_setting, *anchor_setting;
 
     src_setting = load_setting_from_cfg(cfg, "lights.sources");
-    g_lights_length = config_setting_length(src_setting);
-    if(!g_lights_length) return;
-    g_lights = (Light*) get_memory(sizeof(Light) * g_lights_length, NULL);
-    for(light_i = 0; light_i < g_lights_length; light_i++)
+    g_conf.lights_length = config_setting_length(src_setting);
+    if(!g_conf.lights_length) return;
+    g_conf.lights = (Light*) get_memory(sizeof(Light) * g_conf.lights_length, NULL);
+    for(light_i = 0; light_i < g_conf.lights_length; light_i++)
     {
         light_setting = config_setting_get_elem(src_setting, light_i);
         curr_light.const_att_factor = load_long_double(light_setting, "const_att_factor");
@@ -541,19 +536,45 @@ void load_lights(config_t *cfg)
         anchor_setting = load_setting(light_setting, "anchor");
         curr_light.anchor = load_vector(anchor_setting);
         curr_light.color = load_color(color_setting);
-        g_lights[light_i] = curr_light;
+        g_conf.lights[light_i] = curr_light;
     }
 }
 
 /*
- * Loads the enviornmental light factor in the variable 'g_environment_light'
+ * Loads the enviornmental light factor in the variable 'lights.environment_light'
  *
  * cfg: loaded configuration file.
  */
 void load_environment_light(config_t *cfg)
 {
     config_setting_t *environment_setting = load_setting_from_cfg(cfg, "lights.environment_light");
-    g_environment_light = load_color(environment_setting);
+    g_conf.environment_light = load_color(environment_setting);
+}
+
+/*
+ * Loads the configuration for image generation. It includes maximum transparency level,
+ * maximum antialiasing level, maximum mirror level, and the dimensions of the image.
+ *
+ * cfg: loaded configuration file.
+ */
+void load_image_gen_config(config_t *cfg)
+{
+    int cache_i;
+
+    config_setting_t *config_setting = load_setting_from_cfg(cfg, "config");
+    g_conf.max_transparency_level = load_int(config_setting, "max_transparency_level");
+    g_conf.max_antialiase_level = load_int(config_setting, "max_antialiase_level");
+    g_conf.max_mirror_level = load_int(config_setting, "max_mirror_level");
+    g_conf.width_res = load_int(config_setting, "image_width");
+    g_conf.height_res = load_int(config_setting, "image_height");
+
+    g_conf.pixel_density = pow(2, g_conf.max_antialiase_level - 1);
+	g_conf.row_ray_count = (g_conf.width_res * g_conf.pixel_density) + 1;
+	g_conf.cache_size = (g_conf.pixel_density + 1) * g_conf.row_ray_count;
+	g_conf.ray_cache = get_memory(sizeof(CachedRay) * g_conf.cache_size, NULL);
+	// Initialize cache
+	for(cache_i = 0; cache_i < g_conf.cache_size; cache_i++)
+        g_conf.ray_cache[cache_i].row = -1;
 }
 
 /*
@@ -719,5 +740,6 @@ void load_scene(char* scene_file_path)
     load_objects(&cfg);
     load_lights(&cfg);
     load_environment_light(&cfg);
+    load_image_gen_config(&cfg);
     config_destroy(&cfg);
 }

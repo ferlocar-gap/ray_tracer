@@ -661,26 +661,28 @@
 1359515282 c:\users\usuario\documents\github\ray_tracer\figures\sphere.h
 	"../tracing/vector.h"
 
-1360036598 source:c:\users\usuario\documents\github\ray_tracer\tracing\intersection.c
+1360368178 source:c:\users\usuario\documents\github\ray_tracer\tracing\intersection.c
 	<stdio.h>
 	<stdlib.h>
 	<math.h>
+	"../scene_config.h"
 	"../utilities/memory_handler.h"
 	"vector.h"
 	"intersection.h"
 	"object.h"
 
-1360119734 source:c:\users\usuario\documents\github\ray_tracer\tracing\light.c
+1360368958 source:c:\users\usuario\documents\github\ray_tracer\tracing\light.c
 	<stdio.h>
 	<stdlib.h>
 	<math.h>
+	"../scene_config.h"
 	"color.h"
 	"light.h"
 	"vector.h"
 	"intersection.h"
 	"object.h"
 
-1360118048 c:\users\usuario\documents\github\ray_tracer\tracing\light.h
+1360121914 c:\users\usuario\documents\github\ray_tracer\tracing\light.h
 	"vector.h"
 	"color.h"
 	"intersection.h"
@@ -715,11 +717,13 @@
 1359922672 c:\users\usuario\documents\github\ray_tracer\utilities\error_handler.h
 	<libconfig.h>
 
-1360119024 source:c:\users\usuario\documents\github\ray_tracer\loading\scene_loader.c
+1360369637 source:c:\users\usuario\documents\github\ray_tracer\loading\scene_loader.c
 	<stdio.h>
 	<stdlib.h>
 	<libconfig.h>
 	<ctype.h>
+	<math.h>
+	"../scene_config.h"
 	"../utilities/memory_handler.h"
 	"../utilities/error_handler.h"
 	"../tracing/vector.h"
@@ -737,10 +741,11 @@
 
 1355004758 c:\users\usuario\documents\github\ray_tracer\tracing\window.h
 
-1360118896 source:c:\users\usuario\documents\github\ray_tracer\ray_tracer.c
+1360369579 source:c:\users\usuario\documents\github\ray_tracer\ray_tracer.c
 	<stdio.h>
 	<stdlib.h>
 	<math.h>
+	"scene_config.h"
 	"utilities/memory_handler.h"
 	"utilities/error_handler.h"
 	"utilities/file_handler.h"
@@ -760,4 +765,12 @@
 
 1359515914 c:\users\usuario\documents\github\ray_tracer\tracing\cached_ray.h
 	"color.h"
+
+1360369447 c:\users\usuario\documents\github\ray_tracer\scene_config.h
+	"tracing/vector.h"
+	"tracing/window.h"
+	"tracing/color.h"
+	"tracing/object.h"
+	"tracing/light.h"
+	"tracing/cached_ray.h"
 

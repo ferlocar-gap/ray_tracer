@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include "scene_config.h"
 #include "utilities/memory_handler.h"
 #include "utilities/error_handler.h"
 #include "utilities/file_handler.h"
@@ -31,22 +32,8 @@
 #include "tracing/cached_ray.h"
 
 // Global Variables
-Window g_window;
-Vector g_eye;
-Color g_background;
-Object *g_objs;
-int g_objs_length;
-Light *g_lights;
-int g_lights_length;
-Color g_environment_light;
-int g_max_mirror_level = 1;
-int g_max_antialiase_level = 2;
-CachedRay *g_ray_cache;
-int g_pixel_density;
-int g_row_ray_count;
-int g_cache_size;
+SceneConfig g_conf;
 int g_current_row;
-int g_max_transparency_level = 1;
 
 /*
  * Returns the color that is seen from the position 'eye' when looking at the
@@ -62,32 +49,32 @@ Color get_ray_color(long double w_coord, long double h_coord, int width_res, int
     long double x_window, y_window, z_window;
     Vector dir_vec;
     // Get cached ray according to given coordinates
-    w_cache = w_coord * g_pixel_density;
-    h_cache = (h_coord - g_current_row) * g_pixel_density * g_row_ray_count;
+    w_cache = w_coord * g_conf.pixel_density;
+    h_cache = (h_coord - g_current_row) * g_conf.pixel_density * g_conf.row_ray_count;
     cache_index = w_cache + h_cache;
-    cached_ray = g_ray_cache[cache_index];
+    cached_ray = g_conf.ray_cache[cache_index];
     if(h_cache == 0 && cached_ray.row > -1)
     {
-        cached_ray = g_ray_cache[w_cache + g_pixel_density * g_row_ray_count];
+        cached_ray = g_conf.ray_cache[w_cache + g_conf.pixel_density * g_conf.row_ray_count];
         cached_ray.row = g_current_row;
     }
     // Check if we already know the color for this ray
     if(cached_ray.row < g_current_row)
     {
         // Map the framebuffer position to universal coordinates
-        x_window = g_window.x_min + ((w_coord * (g_window.x_max - g_window.x_min)) / width_res);
-        y_window = g_window.y_min + ((h_coord * (g_window.y_max - g_window.y_min)) / height_res);
-        z_window = g_window.z_anchor;
+        x_window = g_conf.window.x_min + ((w_coord * (g_conf.window.x_max - g_conf.window.x_min)) / width_res);
+        y_window = g_conf.window.y_min + ((h_coord * (g_conf.window.y_max - g_conf.window.y_min)) / height_res);
+        z_window = g_conf.window.z_anchor;
         // Get the ray vector for the current pixel
-        dir_vec.x = x_window - g_eye.x;
-        dir_vec.y = y_window - g_eye.y;
-        dir_vec.z = z_window - g_eye.z;
+        dir_vec.x = x_window - g_conf.eye.x;
+        dir_vec.y = y_window - g_conf.eye.y;
+        dir_vec.z = z_window - g_conf.eye.z;
         normalize_vector(&dir_vec);
         // We save the color of the pixel
-        cached_ray.color = get_color(g_eye, dir_vec, 0);
+        cached_ray.color = get_color(g_conf.eye, dir_vec, 0);
         cached_ray.row = g_current_row;
     }
-    g_ray_cache[cache_index] = cached_ray;
+    g_conf.ray_cache[cache_index] = cached_ray;
     return cached_ray.color;
 }
 
@@ -160,7 +147,7 @@ Color get_pixel_color(long double w_coord, long double h_coord, int width_res, i
     colors[3] = get_ray_color(w_coord + vertex_diff, h_coord + vertex_diff, width_res, height_res);
     avg_color = get_avg_color(colors);
     // Check if we have reached the max antialiasing level
-    if(level + 1 > g_max_antialiase_level) return avg_color;
+    if(level + 1 > g_conf.max_antialiase_level) return avg_color;
     // Antialiase
     sub_pixel_diff = vertex_diff / 2.0;
     if(are_colors_too_different(colors[0], avg_color))
@@ -193,16 +180,8 @@ Color get_pixel_color(long double w_coord, long double h_coord, int width_res, i
  */
 void paint_scene(int width_res, int height_res)
 {
-	int w_index, h_index, cache_i;
+	int w_index, h_index;
 	Color *image, *image_back_up;
-
-	g_pixel_density = pow(2, g_max_antialiase_level - 1);
-	g_row_ray_count = (width_res * g_pixel_density) + 1;
-	g_cache_size = (g_pixel_density + 1) * g_row_ray_count;
-	g_ray_cache = get_memory(sizeof(CachedRay) * g_cache_size, NULL);
-	// Initialize cache
-	for(cache_i = 0; cache_i < g_cache_size; cache_i++)
-        g_ray_cache[cache_i].row = -1;
 
 	image = get_memory(sizeof(Color) * width_res * height_res, NULL);
 	image_back_up = image;
@@ -218,12 +197,11 @@ void paint_scene(int width_res, int height_res)
     }
     create_image(image_back_up, height_res, width_res);
     free(image_back_up);
-    free(g_ray_cache);
 }
 
 int main(int argc, char** argv)
 {
 	load_scene("scene.cfg");
-	paint_scene(800, 800);
+	paint_scene(g_conf.width_res, g_conf.height_res);
 	return 0;
 }

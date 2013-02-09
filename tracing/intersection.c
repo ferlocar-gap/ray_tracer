@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include "../scene_config.h"
 #include "../utilities/memory_handler.h"
 #include "vector.h"
 #include "intersection.h"
@@ -17,8 +18,7 @@
 #define INTER_EPSILON 0.001
 
 // Attributes
-extern Object* g_objs;
-extern int g_objs_length;
+extern SceneConfig g_conf;
 
 // Methods
 
@@ -106,12 +106,12 @@ Intersection* get_intersections(Vector eye, Vector dir_vec, int* length)
     Intersection obj_inter;
     int obj_index, inter_index, obj_inter_amount, obj_inter_i;
 	// Create an intersection list with the maximum of intersections that can be found.
-	inter_list = get_memory(sizeof(Intersection) * g_objs_length * 2, NULL);
+	inter_list = get_memory(sizeof(Intersection) * g_conf.objs_length * 2, NULL);
 	inter_index = 0;
-	for(obj_index = 0; obj_index < g_objs_length; obj_index++)
+	for(obj_index = 0; obj_index < g_conf.objs_length; obj_index++)
 	{
 		// For each object in the scene we look for an intersection
-		obj_inter_list = get_object_intersection(eye, dir_vec, g_objs[obj_index], &obj_inter_amount);
+		obj_inter_list = get_object_intersection(eye, dir_vec, g_conf.objs[obj_index], &obj_inter_amount);
 		if(obj_inter_list)
 		{
 			for(obj_inter_i = 0; obj_inter_i < obj_inter_amount; obj_inter_i++)
