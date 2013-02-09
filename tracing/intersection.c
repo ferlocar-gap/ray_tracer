@@ -17,9 +17,6 @@
 // Constants
 #define INTER_EPSILON 0.001
 
-// Attributes
-extern SceneConfig g_conf;
-
 // Methods
 
 /*
@@ -99,19 +96,20 @@ Intersection* get_object_intersection(Vector eye, Vector dir_vec, Object obj, in
  * eye: Anchor of the ray that is used to find intersections
  * dir_vec: Direction of the ray. This vector must be normalized.
  * length: Output parameter to indicate how many intersections were returned.
+ * conf: Configuration of the scene.
  */
-Intersection* get_intersections(Vector eye, Vector dir_vec, int* length)
+Intersection* get_intersections(Vector eye, Vector dir_vec, int* length, SceneConfig conf)
 {
     Intersection *inter_list, *obj_inter_list;
     Intersection obj_inter;
     int obj_index, inter_index, obj_inter_amount, obj_inter_i;
 	// Create an intersection list with the maximum of intersections that can be found.
-	inter_list = get_memory(sizeof(Intersection) * g_conf.objs_length * 2, NULL);
+	inter_list = get_memory(sizeof(Intersection) * conf.objs_length * 2, NULL);
 	inter_index = 0;
-	for(obj_index = 0; obj_index < g_conf.objs_length; obj_index++)
+	for(obj_index = 0; obj_index < conf.objs_length; obj_index++)
 	{
 		// For each object in the scene we look for an intersection
-		obj_inter_list = get_object_intersection(eye, dir_vec, g_conf.objs[obj_index], &obj_inter_amount);
+		obj_inter_list = get_object_intersection(eye, dir_vec, conf.objs[obj_index], &obj_inter_amount);
 		if(obj_inter_list)
 		{
 			for(obj_inter_i = 0; obj_inter_i < obj_inter_amount; obj_inter_i++)

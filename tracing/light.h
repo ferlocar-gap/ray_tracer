@@ -1,9 +1,9 @@
 #ifndef LIGHT_H
 #define LIGHT_H
 
+#include "../scene_config.h"
 #include "vector.h"
 #include "color.h"
-#include "intersection.h"
 
 /*
  * Represents a light source on the scene.
@@ -22,7 +22,5 @@ typedef struct
 	long double lin_att_factor;
 	long double expo_att_factor;
 } Light;
-
-Color get_color(Vector eye, Vector dir_vec, int mirror_level);
 
 #endif

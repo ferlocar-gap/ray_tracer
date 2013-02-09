@@ -27,54 +27,54 @@
 #include "tracing/window.h"
 #include "tracing/vector.h"
 #include "tracing/object.h"
-#include "tracing/light.h"
+#include "tracing/light_f.h"
 #include "tracing/intersection.h"
 #include "tracing/cached_ray.h"
 
 // Global Variables
-SceneConfig g_conf;
 int g_current_row;
 
 /*
- * Returns the color that is seen from the position 'eye' when looking at the
- * tridimensional scene towards the direction 'dir_vec'.
+ * Returns the color found by a ray thrown from the eye towards a coordinate
+ * from the scene window.
  *
- * eye: Position from which the scene is seen.
- * dir_vec: Direction at which the eye is looking. This vector must be normalized.
+ * w_coord: Horizontal coordinate of the scene window.
+ * h_coord: Vertical coordinate of the scene window.
+ * conf: Configuration of the scene.
  */
-Color get_ray_color(long double w_coord, long double h_coord, int width_res, int height_res)
+Color get_ray_color(long double w_coord, long double h_coord, SceneConfig conf)
 {
     int w_cache, h_cache, cache_index;
     CachedRay cached_ray;
     long double x_window, y_window, z_window;
     Vector dir_vec;
     // Get cached ray according to given coordinates
-    w_cache = w_coord * g_conf.pixel_density;
-    h_cache = (h_coord - g_current_row) * g_conf.pixel_density * g_conf.row_ray_count;
+    w_cache = w_coord * conf.pixel_density;
+    h_cache = (h_coord - g_current_row) * conf.pixel_density * conf.row_ray_count;
     cache_index = w_cache + h_cache;
-    cached_ray = g_conf.ray_cache[cache_index];
+    cached_ray = conf.ray_cache[cache_index];
     if(h_cache == 0 && cached_ray.row > -1)
     {
-        cached_ray = g_conf.ray_cache[w_cache + g_conf.pixel_density * g_conf.row_ray_count];
+        cached_ray = conf.ray_cache[w_cache + conf.pixel_density * conf.row_ray_count];
         cached_ray.row = g_current_row;
     }
     // Check if we already know the color for this ray
     if(cached_ray.row < g_current_row)
     {
         // Map the framebuffer position to universal coordinates
-        x_window = g_conf.window.x_min + ((w_coord * (g_conf.window.x_max - g_conf.window.x_min)) / width_res);
-        y_window = g_conf.window.y_min + ((h_coord * (g_conf.window.y_max - g_conf.window.y_min)) / height_res);
-        z_window = g_conf.window.z_anchor;
+        x_window = conf.window.x_min + ((w_coord * (conf.window.x_max - conf.window.x_min)) / conf.width_res);
+        y_window = conf.window.y_min + ((h_coord * (conf.window.y_max - conf.window.y_min)) / conf.height_res);
+        z_window = conf.window.z_anchor;
         // Get the ray vector for the current pixel
-        dir_vec.x = x_window - g_conf.eye.x;
-        dir_vec.y = y_window - g_conf.eye.y;
-        dir_vec.z = z_window - g_conf.eye.z;
+        dir_vec.x = x_window - conf.eye.x;
+        dir_vec.y = y_window - conf.eye.y;
+        dir_vec.z = z_window - conf.eye.z;
         normalize_vector(&dir_vec);
         // We save the color of the pixel
-        cached_ray.color = get_color(g_conf.eye, dir_vec, 0);
+        cached_ray.color = get_color(conf.eye, dir_vec, 0, conf);
         cached_ray.row = g_current_row;
     }
-    g_conf.ray_cache[cache_index] = cached_ray;
+    conf.ray_cache[cache_index] = cached_ray;
     return cached_ray.color;
 }
 
@@ -110,6 +110,7 @@ Color get_avg_color(Color *ray_colors)
  *
  * color1: First color that will be compared.
  * color2: Second color that will be compared.
+ * conf: Configuration of the scene.
  */
 int are_colors_too_different(Color color1, Color color2)
 {
@@ -124,16 +125,15 @@ int are_colors_too_different(Color color1, Color color2)
  *
  * w_coord: Horizontal coordinate of the pixel in the image.
  * h_coord: Vertical coordinate of the pixel in the image.
- * width_res: Width in pixels of the image.
- * height_res: Height in pixels of the image.
  * level: Antialiasing level. It indicates the size of the pixel/subpixel.
  *          Level 1 -> Normal sized pixel
  *          Level 2 -> Subpixel, one half the size and width of a normal pixel
  *          Level 3 -> Subpixel, one quarter the size and width of a normal pixel
  *          Level 4 -> Subpixel, one eigth the size and width of a normal pixel
  *          etc...
+ * conf: Configuration of the scene.
  */
-Color get_pixel_color(long double w_coord, long double h_coord, int width_res, int height_res, int level)
+Color get_pixel_color(long double w_coord, long double h_coord, int level, SceneConfig conf)
 {
     Color colors[4];
     Color avg_color;
@@ -141,30 +141,30 @@ Color get_pixel_color(long double w_coord, long double h_coord, int width_res, i
 
     vertex_diff = 1.0 / level;
     // Throw a ray for all vertex of the pixel
-    colors[0] = get_ray_color(w_coord, h_coord, width_res, height_res);
-    colors[1] = get_ray_color(w_coord + vertex_diff, h_coord, width_res, height_res);
-    colors[2] = get_ray_color(w_coord, h_coord + vertex_diff, width_res, height_res);
-    colors[3] = get_ray_color(w_coord + vertex_diff, h_coord + vertex_diff, width_res, height_res);
+    colors[0] = get_ray_color(w_coord, h_coord, conf);
+    colors[1] = get_ray_color(w_coord + vertex_diff, h_coord, conf);
+    colors[2] = get_ray_color(w_coord, h_coord + vertex_diff, conf);
+    colors[3] = get_ray_color(w_coord + vertex_diff, h_coord + vertex_diff, conf);
     avg_color = get_avg_color(colors);
     // Check if we have reached the max antialiasing level
-    if(level + 1 > g_conf.max_antialiase_level) return avg_color;
+    if(level + 1 > conf.max_antialiase_level) return avg_color;
     // Antialiase
     sub_pixel_diff = vertex_diff / 2.0;
     if(are_colors_too_different(colors[0], avg_color))
     {
-        colors[0] = get_pixel_color(w_coord, h_coord, width_res, height_res, level+1);
+        colors[0] = get_pixel_color(w_coord, h_coord, level+1, conf);
     }
     if(are_colors_too_different(colors[1], avg_color))
     {
-        colors[1] = get_pixel_color(w_coord + sub_pixel_diff, h_coord, width_res, height_res, level+1);
+        colors[1] = get_pixel_color(w_coord + sub_pixel_diff, h_coord, level+1, conf);
     }
     if(are_colors_too_different(colors[2], avg_color))
     {
-        colors[2] = get_pixel_color(w_coord, h_coord + sub_pixel_diff, width_res, height_res, level+1);
+        colors[2] = get_pixel_color(w_coord, h_coord + sub_pixel_diff, level+1, conf);
     }
     if(are_colors_too_different(colors[3], avg_color))
     {
-        colors[3] = get_pixel_color(w_coord + sub_pixel_diff, h_coord + sub_pixel_diff, width_res, height_res, level+1);
+        colors[3] = get_pixel_color(w_coord + sub_pixel_diff, h_coord + sub_pixel_diff, level+1, conf);
     }
     return get_avg_color(colors);
 }
@@ -175,33 +175,32 @@ Color get_pixel_color(long double w_coord, long double h_coord, int width_res, i
  * objects should be initialized before calling this method, by calling the
  * 'load_scene' method.
  *
- * width_res: Horizontal resolution of the image.
- * height_res: Vertical resolution of the image.
+ * conf: Configuration of the scene.
  */
-void paint_scene(int width_res, int height_res)
+void paint_scene(SceneConfig conf)
 {
 	int w_index, h_index;
 	Color *image, *image_back_up;
 
-	image = get_memory(sizeof(Color) * width_res * height_res, NULL);
+	image = get_memory(sizeof(Color) * conf.width_res * conf.height_res, NULL);
 	image_back_up = image;
 	g_current_row = 0;
 	// Calculate the color of each pixel of the framebuffer
-	for(h_index = 0; h_index < height_res; h_index++)
+	for(h_index = 0; h_index < conf.height_res; h_index++)
     {
-        for(w_index = 0; w_index < width_res; w_index++)
+        for(w_index = 0; w_index < conf.width_res; w_index++)
 		{
-			*(image++) = get_pixel_color(w_index, h_index, width_res, height_res, 1);
+			*(image++) = get_pixel_color(w_index, h_index, 1, conf);
 		}
 		g_current_row++;
     }
-    create_image(image_back_up, height_res, width_res);
+    create_image(image_back_up, conf.height_res, conf.width_res);
     free(image_back_up);
 }
 
 int main(int argc, char** argv)
 {
-	load_scene("scene.cfg");
-	paint_scene(g_conf.width_res, g_conf.height_res);
+	SceneConfig scene_config = load_scene("scene.cfg");
+	paint_scene(scene_config);
 	return 0;
 }

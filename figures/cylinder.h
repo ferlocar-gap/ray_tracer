@@ -2,6 +2,7 @@
 #define CYLINDER_H
 
 #include "../tracing/vector.h"
+#include "../tracing/intersection.h"
 
 /*
  * Represents a cylinder object

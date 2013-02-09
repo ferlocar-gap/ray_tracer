@@ -3,6 +3,7 @@
 
 #include "vector.h"
 #include "object.h"
+#include "../scene_config.h"
 
 /*
  * Represents an intersection with a scene object.
@@ -21,6 +22,6 @@ typedef struct
 	int is_valid;
 } Intersection;
 
-Intersection* get_intersections(Vector eye, Vector dir_vec, int* length);
+Intersection* get_intersections(Vector eye, Vector dir_vec, int* length, SceneConfig conf);
 
 #endif
