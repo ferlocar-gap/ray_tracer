@@ -503,7 +503,6 @@ void load_eye(config_t *cfg, SceneConfig *conf)
 {
     config_setting_t *eye_setting = load_setting_from_cfg(cfg, "eye");
     conf->eye = load_vector(eye_setting);
-    g_eye = conf->eye;
 }
 
 /*

@@ -124,9 +124,97 @@ long double get_attenuation_factor(Light light, long double distance)
 	else return att_factor;
 }
 
+
+/*
+ * Adds the effect of the given light over the given intersection.
+ *
+ * light: Light that is being applied.
+ * inter: Intersection over which the light is being applied.
+ * normal_vec:  Normal vector of the intersection point. It is passed by as a
+ *              parameter for optimization purposes.
+ * rev_dir_vec: Reverse vector of the direction of the ray that comes from the
+ *              eye. It is passed by as a parameter for optimization purposes.
+ * all_lights_color: Accumulated amount of light sources effect. The effect of
+ *              the given light is added to this total.
+ * all_lights_color: Accumulated amount of the specular light effect. The
+ *              specular effect of the given light is added to this total.
+ * conf: Configuration of the scene.
+ */
+void apply_light_source(Light light,
+                        Intersection inter,
+                        Vector normal_vec,
+                        Vector rev_dir_vec,
+                        Color *all_lights_color,
+                        long double *all_spec_light,
+                        SceneConfig conf)
+{
+    Vector light_vec;
+    long double light_distance, illum_cos, att_factor, spec_cos;
+    Color light_filter;
+    Intersection* shadow_inter;
+    int shadow_i, shadow_inter_length;
+    Object shadow_obj;
+
+    // Find the vector that points from the intersection point to the light
+    // source, and normalize it
+    light_vec = subtract_vectors(light.anchor, inter.posn);
+    light_distance = normalize_vector(&light_vec);
+    // We check for any object making a shadow from that light
+    light_filter = (Color){ .red = 1.0, .green = 1.0, .blue = 1.0 };;
+    shadow_inter = get_intersections(inter.posn, light_vec, &shadow_inter_length, conf);
+    // If the intersection is beyond the light source, we ignore it
+    if(shadow_inter)
+    {   // Object(s) is/are actually behind the light
+        for(shadow_i = 0; shadow_i < shadow_inter_length && !is_color_empty(light_filter); shadow_i++)
+        {
+            if(shadow_inter[shadow_i].distance < light_distance)
+            {
+                shadow_obj = shadow_inter[shadow_i].obj;
+                if(shadow_obj.translucency_material)
+                {
+                    light_filter = multiply_color(shadow_obj.translucency_material, multiply_colors(light_filter, shadow_obj.color));
+                }
+                else
+                {
+                    light_filter = get_empty_color();
+                }
+            }
+
+        }
+        if(!is_color_empty(light_filter))
+        {
+            free(shadow_inter);
+            shadow_inter = NULL;
+        }
+    }
+    // If there aren't any shadows
+    if(!shadow_inter)
+    {
+        illum_cos = do_dot_product(normal_vec, light_vec);
+        // We only take it into account if the angle is lower than 90 degrees
+        if(illum_cos > 0)
+        {
+            Vector light_mirror_vec = subtract_vectors(multiply_vector(2 * illum_cos, normal_vec), light_vec);
+            // Attenuation factor, reduces the light energy depending on the distance
+            att_factor = get_attenuation_factor(light, light_distance);
+            spec_cos = do_dot_product(rev_dir_vec, light_mirror_vec);
+            // We add the light source effect
+            light_filter = multiply_color(illum_cos * inter.obj.light_material * att_factor, light_filter);
+            *all_lights_color = add_colors(*all_lights_color, multiply_colors(light_filter, light.color));
+            // The specular light, is the white stain on the objects
+            if(spec_cos > 0)
+            {
+                *all_spec_light += pow(spec_cos * inter.obj.specular_material * att_factor, inter.obj.specular_pow);
+            }
+        }
+    }
+    else free(shadow_inter);
+}
+
 /*
  * Gets the color of the intersection by calculating light intensity,
  * (which includes specular light, shadows, transparency, etc)
+ *
  * light: Light for which the attenuation factor is calculated.
  * distance: Distance between the light and an illuminated spot.
  * mirror_level: Current level of reflection.
@@ -141,13 +229,11 @@ Color get_intersection_color(Vector eye,
                              SceneConfig conf)
 {
     Intersection inter;
-    int light_index, shadow_inter_length, shadow_i;
-    Object shadow_obj;
-    long double light_distance, illum_cos, spec_light_factor, att_factor,
-                spec_cos, mirror_factor, transparency_factor;
-    Vector normal_vec, light_vec, rev_dir_vec, reflection_vec;
+    int light_index;
+    long double spec_light_factor, mirror_factor, transparency_factor;
+    Vector normal_vec, rev_dir_vec, reflection_vec;
     Light light;
-    Color all_lights_color, color_found, light_filter, reflection_color,
+    Color all_lights_color, color_found, reflection_color,
           transparency_color, final_color;
 
     inter = inter_list[transparency_level];
@@ -164,61 +250,7 @@ Color get_intersection_color(Vector eye,
     for(light_index = 0; light_index < conf.lights_length; light_index++)
     {
         light = conf.lights[light_index];
-        // Find the vector that points from the intersection point to the light
-        // source, and normalize it
-        light_vec = subtract_vectors(light.anchor, inter.posn);
-        light_distance = normalize_vector(&light_vec);
-        // We check for any object making a shadow from that light
-        light_filter = (Color){ .red = 1.0, .green = 1.0, .blue = 1.0 };;
-        Intersection* shadow_inter = get_intersections(inter.posn, light_vec, &shadow_inter_length, conf);
-        // If the intersection is beyond the light source, we ignore it
-        if(shadow_inter)
-        {   // Object(s) is/are actually behind the light
-            for(shadow_i = 0; shadow_i < shadow_inter_length && !is_color_empty(light_filter); shadow_i++)
-            {
-                if(shadow_inter[shadow_i].distance < light_distance)
-                {
-                    shadow_obj = shadow_inter[shadow_i].obj;
-                    if(shadow_obj.translucency_material)
-                    {
-                        light_filter = multiply_color(shadow_obj.translucency_material, multiply_colors(light_filter, shadow_obj.color));
-                    }
-                    else
-                    {
-                        light_filter = get_empty_color();
-                    }
-                }
-
-            }
-            if(!is_color_empty(light_filter))
-            {
-                free(shadow_inter);
-                shadow_inter = NULL;
-            }
-        }
-        // If there aren't any shadows
-        if(!shadow_inter)
-        {
-            illum_cos = do_dot_product(normal_vec, light_vec);
-            // We only take it into account if the angle is lower than 90 degrees
-            if(illum_cos > 0)
-            {
-                Vector light_mirror_vec = subtract_vectors(multiply_vector(2 * illum_cos, normal_vec), light_vec);
-                // Attenuation factor, reduces the light energy depending on the distance
-                att_factor = get_attenuation_factor(light, light_distance);
-                spec_cos = do_dot_product(rev_dir_vec, light_mirror_vec);
-                // We add the light source effect
-                light_filter = multiply_color(illum_cos * inter.obj.light_material * att_factor, light_filter);
-                all_lights_color = add_colors(all_lights_color, multiply_colors(light_filter, light.color));
-                // The specular light, is the white stain on the objects
-                if(spec_cos > 0)
-                {
-                    spec_light_factor += pow(spec_cos * inter.obj.specular_material * att_factor, inter.obj.specular_pow);
-                }
-
-            }
-        }
-        else free(shadow_inter);
+        apply_light_source(light, inter, normal_vec, rev_dir_vec, &all_lights_color, &spec_light_factor, conf);
     }
     // We add the environmental light of the scene
     all_lights_color = add_colors(all_lights_color, multiply_color(inter.obj.light_ambiental, conf.environment_light));

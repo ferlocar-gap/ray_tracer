@@ -720,7 +720,7 @@
 1359922672 c:\users\usuario\documents\github\ray_tracer\utilities\error_handler.h
 	<libconfig.h>
 
-1360375008 source:c:\users\usuario\documents\github\ray_tracer\loading\scene_loader.c
+1360375925 source:c:\users\usuario\documents\github\ray_tracer\loading\scene_loader.c
 	<stdio.h>
 	<stdlib.h>
 	<libconfig.h>
