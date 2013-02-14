@@ -68,6 +68,7 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="scene.cfg" />
+		<Unit filename="scene_config.h" />
 		<Unit filename="tracing/cached_ray.h" />
 		<Unit filename="tracing/color.h" />
 		<Unit filename="tracing/intersection.c">
@@ -78,6 +79,7 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="tracing/light.h" />
+		<Unit filename="tracing/light_f.h" />
 		<Unit filename="tracing/object.h" />
 		<Unit filename="tracing/vector.c">
 			<Option compilerVar="CC" />
