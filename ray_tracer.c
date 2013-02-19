@@ -31,9 +31,6 @@
 #include "tracing/intersection.h"
 #include "tracing/cached_ray.h"
 
-// Global Variables
-int g_current_row;
-
 /*
  * Returns the color found by a ray thrown from the eye towards a coordinate
  * from the scene window.
@@ -41,8 +38,9 @@ int g_current_row;
  * w_coord: Horizontal coordinate of the scene window.
  * h_coord: Vertical coordinate of the scene window.
  * conf: Configuration of the scene.
+ * current_row: Current row of the image being painted.
  */
-Color get_ray_color(long double w_coord, long double h_coord, SceneConfig conf)
+Color get_ray_color(long double w_coord, long double h_coord, SceneConfig conf, int current_row)
 {
     int w_cache, h_cache, cache_index;
     CachedRay cached_ray;
@@ -50,16 +48,16 @@ Color get_ray_color(long double w_coord, long double h_coord, SceneConfig conf)
     Vector dir_vec;
     // Get cached ray according to given coordinates
     w_cache = w_coord * conf.pixel_density;
-    h_cache = (h_coord - g_current_row) * conf.pixel_density * conf.row_ray_count;
+    h_cache = (h_coord - current_row) * conf.pixel_density * conf.row_ray_count;
     cache_index = w_cache + h_cache;
     cached_ray = conf.ray_cache[cache_index];
     if(h_cache == 0 && cached_ray.row > -1)
     {
         cached_ray = conf.ray_cache[w_cache + conf.pixel_density * conf.row_ray_count];
-        cached_ray.row = g_current_row;
+        cached_ray.row = current_row;
     }
     // Check if we already know the color for this ray
-    if(cached_ray.row < g_current_row)
+    if(cached_ray.row < current_row)
     {
         // Map the framebuffer position to universal coordinates
         x_window = conf.window.x_min + ((w_coord * (conf.window.x_max - conf.window.x_min)) / conf.width_res);
@@ -72,7 +70,7 @@ Color get_ray_color(long double w_coord, long double h_coord, SceneConfig conf)
         normalize_vector(&dir_vec);
         // We save the color of the pixel
         cached_ray.color = get_color(conf.eye, dir_vec, 0, conf);
-        cached_ray.row = g_current_row;
+        cached_ray.row = current_row;
     }
     conf.ray_cache[cache_index] = cached_ray;
     return cached_ray.color;
@@ -132,8 +130,9 @@ int are_colors_too_different(Color color1, Color color2)
  *          Level 4 -> Subpixel, one eigth the size and width of a normal pixel
  *          etc...
  * conf: Configuration of the scene.
+ * current_row: Current row of the image being painted.
  */
-Color get_pixel_color(long double w_coord, long double h_coord, int level, SceneConfig conf)
+Color get_pixel_color(long double w_coord, long double h_coord, int level, SceneConfig conf, int current_row)
 {
     Color colors[4];
     Color avg_color;
@@ -141,10 +140,10 @@ Color get_pixel_color(long double w_coord, long double h_coord, int level, Scene
 
     vertex_diff = 1.0 / level;
     // Throw a ray for all vertex of the pixel
-    colors[0] = get_ray_color(w_coord, h_coord, conf);
-    colors[1] = get_ray_color(w_coord + vertex_diff, h_coord, conf);
-    colors[2] = get_ray_color(w_coord, h_coord + vertex_diff, conf);
-    colors[3] = get_ray_color(w_coord + vertex_diff, h_coord + vertex_diff, conf);
+    colors[0] = get_ray_color(w_coord, h_coord, conf, current_row);
+    colors[1] = get_ray_color(w_coord + vertex_diff, h_coord, conf, current_row);
+    colors[2] = get_ray_color(w_coord, h_coord + vertex_diff, conf, current_row);
+    colors[3] = get_ray_color(w_coord + vertex_diff, h_coord + vertex_diff, conf, current_row);
     avg_color = get_avg_color(colors);
     // Check if we have reached the max antialiasing level
     if(level + 1 > conf.max_antialiase_level) return avg_color;
@@ -152,19 +151,19 @@ Color get_pixel_color(long double w_coord, long double h_coord, int level, Scene
     sub_pixel_diff = vertex_diff / 2.0;
     if(are_colors_too_different(colors[0], avg_color))
     {
-        colors[0] = get_pixel_color(w_coord, h_coord, level+1, conf);
+        colors[0] = get_pixel_color(w_coord, h_coord, level+1, conf, current_row);
     }
     if(are_colors_too_different(colors[1], avg_color))
     {
-        colors[1] = get_pixel_color(w_coord + sub_pixel_diff, h_coord, level+1, conf);
+        colors[1] = get_pixel_color(w_coord + sub_pixel_diff, h_coord, level+1, conf, current_row);
     }
     if(are_colors_too_different(colors[2], avg_color))
     {
-        colors[2] = get_pixel_color(w_coord, h_coord + sub_pixel_diff, level+1, conf);
+        colors[2] = get_pixel_color(w_coord, h_coord + sub_pixel_diff, level+1, conf, current_row);
     }
     if(are_colors_too_different(colors[3], avg_color))
     {
-        colors[3] = get_pixel_color(w_coord + sub_pixel_diff, h_coord + sub_pixel_diff, level+1, conf);
+        colors[3] = get_pixel_color(w_coord + sub_pixel_diff, h_coord + sub_pixel_diff, level+1, conf, current_row);
     }
     return get_avg_color(colors);
 }
@@ -179,20 +178,26 @@ Color get_pixel_color(long double w_coord, long double h_coord, int level, Scene
  */
 void paint_scene(SceneConfig conf)
 {
-	int w_index, h_index;
+	int w_index, h_index, current_row, new_percentage, percentage;
 	Color *image, *image_back_up;
 
 	image = get_memory(sizeof(Color) * conf.width_res * conf.height_res, NULL);
 	image_back_up = image;
-	g_current_row = 0;
+	current_row = percentage = new_percentage = 0;
 	// Calculate the color of each pixel of the framebuffer
 	for(h_index = 0; h_index < conf.height_res; h_index++)
     {
         for(w_index = 0; w_index < conf.width_res; w_index++)
 		{
-			*(image++) = get_pixel_color(w_index, h_index, 1, conf);
+			*(image++) = get_pixel_color(w_index, h_index, 1, conf, current_row);
 		}
-		g_current_row++;
+		current_row++;
+		new_percentage = (current_row * 100) /conf.height_res;
+		if(new_percentage > percentage)
+        {
+            percentage = new_percentage;
+            printf("Percentage completed: %d\n", percentage);
+        }
     }
     create_image(image_back_up, conf.height_res, conf.width_res);
     free(image_back_up);
